@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Paciente } from '../types'
-import {
-  DEMO_EQUIPE_ID,
-  REF_DATE,
-  supabase,
-} from '../lib/supabase'
-import {
-  distribuirSemana,
-  fetchPacientesPriorizados,
-} from '../lib/supabaseAdapter'
+import { REF_DATE, supabase } from '../lib/supabase'
+import { distribuirSemana, fetchPacientesPriorizados } from '../lib/supabaseAdapter'
 
 interface State {
   semana: Map<string, Paciente[]>
@@ -17,15 +10,22 @@ interface State {
   error: Error | null
 }
 
-export function usePacientesSemana(equipeId: string = DEMO_EQUIPE_ID) {
-  const [state, setState] = useState<State>({
-    semana: new Map(),
-    pacientes: [],
-    loading: true,
-    error: null,
-  })
+const EMPTY: State = {
+  semana: new Map(),
+  pacientes: [],
+  loading: false,
+  error: null,
+}
+
+export function usePacientesSemana(equipeId: string | null) {
+  const [state, setState] = useState<State>({ ...EMPTY, loading: !!equipeId })
 
   const carregar = useCallback(async () => {
+    if (!equipeId) {
+      setState(EMPTY)
+      return
+    }
+    setState((s) => ({ ...s, loading: true, error: null }))
     try {
       const pacientes = await fetchPacientesPriorizados(equipeId, REF_DATE)
       setState({
@@ -43,9 +43,8 @@ export function usePacientesSemana(equipeId: string = DEMO_EQUIPE_ID) {
     carregar()
   }, [carregar])
 
-  // Realtime: qualquer INSERT em visitas_capturadas ou mudança em
-  // eventos/visitas dispara recarregamento. O score recomputa server-side.
   useEffect(() => {
+    if (!equipeId) return
     const channel = supabase
       .channel(`equipe-${equipeId}`)
       .on(

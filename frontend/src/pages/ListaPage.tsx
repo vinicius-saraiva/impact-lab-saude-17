@@ -6,11 +6,9 @@ import { SyncBar } from '../components/SyncBar'
 import { MapaVisitas } from '../components/MapaVisitas'
 import { useSync } from '../hooks/useSync'
 import { usePacientesSemana } from '../hooks/usePacientesSemana'
+import { useAcsAtual } from '../hooks/useAcsAtual'
 import { db } from '../db'
 import type { Paciente } from '../types'
-
-const PROFISSIONAL_ID = 'acs-demo-001'
-const NOME_ACS = 'Ana Paula'
 
 const DIAS_PT: Record<string, string> = {
   '0': 'Dom', '1': 'Seg', '2': 'Ter', '3': 'Qua', '4': 'Qui', '5': 'Sex', '6': 'Sáb',
@@ -34,26 +32,36 @@ function rangeSemanaDias(dias: string[]): string {
 
 export function ListaPage() {
   const navigate = useNavigate()
+  const { profissionalId, equipeId, loading: acsLoading } = useAcsAtual()
   const { pendentes, status, isOnline, sincronizar } = useSync()
   const [visitadosSemana, setVisitadosSemana] = useState<Set<string>>(new Set())
   const [aba, setAba] = useState<'lista' | 'mapa'>('lista')
 
-  const { semana, loading, error } = usePacientesSemana()
+  // Sem ACS escolhido → vai pro picker
+  useEffect(() => {
+    if (!acsLoading && !profissionalId) navigate('/selecionar-acs', { replace: true })
+  }, [acsLoading, profissionalId, navigate])
+
+  const { semana, loading, error } = usePacientesSemana(equipeId)
   const diasOrdenados = Array.from(semana.keys()).sort()
   const todosPacientes = diasOrdenados.flatMap((d) => semana.get(d) ?? [])
   const totalSemana = todosPacientes.length
   const visitadosTotal = todosPacientes.filter((p) => visitadosSemana.has(p.id)).length
 
   useEffect(() => {
+    if (!profissionalId || diasOrdenados.length === 0) return
     const inicio = diasOrdenados[0]
     const fim = diasOrdenados[diasOrdenados.length - 1]
     db.visitas
       .where('profissionalId')
-      .equals(PROFISSIONAL_ID)
+      .equals(profissionalId)
       .and((v) => v.dataVisita >= inicio && v.dataVisita <= fim)
       .toArray()
       .then((visitas) => setVisitadosSemana(new Set(visitas.map((v) => v.pacienteId))))
-  }, [])
+  }, [profissionalId, diasOrdenados[0], diasOrdenados[diasOrdenados.length - 1]])
+
+  const nomeAcs = profissionalId ? `Profissional ${profissionalId.slice(-5)}` : 'ACS'
+  const labelEquipe = equipeId ? `Equipe ${equipeId.slice(0, 8)}…` : 'Sem equipe'
 
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
@@ -61,22 +69,30 @@ export function ListaPage() {
       <div className="bg-blue-700 text-white px-4 pt-10 pb-4">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Olá, {NOME_ACS} 👋</h1>
-            <p className="text-blue-200 text-sm mt-0.5">Clínica da Família Rocinha</p>
+            <h1 className="text-2xl font-bold">Olá, {nomeAcs} 👋</h1>
+            <p className="text-blue-200 text-sm mt-0.5">{labelEquipe}</p>
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold">{visitadosTotal}</div>
             <div className="text-blue-200 text-xs">de {totalSemana} visitas</div>
           </div>
         </div>
-        <button
-          onClick={() => navigate('/supervisor')}
-          className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-blue-100 bg-blue-800/60 px-3 py-1.5 rounded-full border border-blue-500/40"
-        >
-          <span>📊</span>
-          Painel de gestão
-          <span className="opacity-70">›</span>
-        </button>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            onClick={() => navigate('/supervisor')}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-100 bg-blue-800/60 px-3 py-1.5 rounded-full border border-blue-500/40"
+          >
+            <span>📊</span>
+            Painel de gestão
+            <span className="opacity-70">›</span>
+          </button>
+          <button
+            onClick={() => navigate('/selecionar-acs')}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-100 bg-blue-800/60 px-3 py-1.5 rounded-full border border-blue-500/40"
+          >
+            🔄 Trocar ACS
+          </button>
+        </div>
         {/* Progress */}
         <div className="mt-3 mb-4">
           <div className="h-1.5 bg-blue-900 rounded-full overflow-hidden">
