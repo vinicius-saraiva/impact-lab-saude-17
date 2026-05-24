@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { CondicaoBadge } from '../components/CondicaoBadge'
 import { PrioridadeBadge } from '../components/PrioridadeBadge'
-import { MOCK_PACIENTES, googleMapsUrl } from '../mockData'
+import { MOCK_PACIENTES } from '../mockData'
 
 export function PacientePage() {
   const { id } = useParams<{ id: string }>()
@@ -78,14 +78,12 @@ export function PacientePage() {
             <span className="text-sm text-slate-700">
               📍 {p.distanciaKm.toFixed(1).replace('.', ',')} km da unidade
             </span>
-            <a
-              href={googleMapsUrl(p)}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => navigate('/', { state: { tab: 'mapa', pacienteId: p.id } })}
               className="text-xs text-blue-600 font-semibold bg-blue-50 px-3 py-1.5 rounded-lg"
             >
-              Abrir no Maps →
-            </a>
+              Ver no mapa →
+            </button>
           </div>
         </div>
 

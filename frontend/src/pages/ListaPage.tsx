@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { PrioridadeBadge } from '../components/PrioridadeBadge'
 import { CondicaoBadge } from '../components/CondicaoBadge'
 import { SyncBar } from '../components/SyncBar'
@@ -36,9 +36,12 @@ function rangeSemanaDias(dias: string[]): string {
 
 export function ListaPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const routeState = location.state as { tab?: string; pacienteId?: string } | null
+
   const { pendentes, status, isOnline, sincronizar } = useSync()
   const [visitadosSemana, setVisitadosSemana] = useState<Set<string>>(new Set())
-  const [aba, setAba] = useState<'lista' | 'mapa'>('lista')
+  const [aba, setAba] = useState<'lista' | 'mapa'>(routeState?.tab === 'mapa' ? 'mapa' : 'lista')
   const [pacienteSelecionado, setPacienteSelecionado] = useState<Paciente | null>(null)
 
   const semana = getPacientesSemana()
@@ -57,6 +60,14 @@ export function ListaPage() {
       .toArray()
       .then((visitas) => setVisitadosSemana(new Set(visitas.map((v) => v.pacienteId))))
   }, [])
+
+  // Abrir bottom sheet do paciente quando navegado via "Ver no mapa"
+  useEffect(() => {
+    if (routeState?.pacienteId && routeState.tab === 'mapa') {
+      const p = todosPacientes.find((x) => x.id === routeState.pacienteId)
+      if (p) setPacienteSelecionado(p)
+    }
+  }, [routeState?.pacienteId, routeState?.tab])
 
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
