@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+data/*.dbc
+data/*.dbf
+data/*.shp
+data/*.shx
+data/*.prj
+*.egg-info/
+.venv/
+venv/
