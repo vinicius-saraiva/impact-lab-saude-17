@@ -12,3 +12,7 @@ data/*.prj
 .venv/
 venv/
 .playwright-mcp/
+.ipynb_checkpoints/
+.marimo.toml
+.idea/
+.vscode/
