@@ -5,8 +5,8 @@ import { CondicaoBadge } from '../components/CondicaoBadge'
 import { SyncBar } from '../components/SyncBar'
 import { MapaVisitas } from '../components/MapaVisitas'
 import { useSync } from '../hooks/useSync'
+import { usePacientesSemana } from '../hooks/usePacientesSemana'
 import { db } from '../db'
-import { getPacientesSemana } from '../mockData'
 import type { Paciente } from '../types'
 
 const PROFISSIONAL_ID = 'acs-demo-001'
@@ -38,7 +38,7 @@ export function ListaPage() {
   const [visitadosSemana, setVisitadosSemana] = useState<Set<string>>(new Set())
   const [aba, setAba] = useState<'lista' | 'mapa'>('lista')
 
-  const semana = getPacientesSemana()
+  const { semana, loading, error } = usePacientesSemana()
   const diasOrdenados = Array.from(semana.keys()).sort()
   const todosPacientes = diasOrdenados.flatMap((d) => semana.get(d) ?? [])
   const totalSemana = todosPacientes.length
@@ -123,7 +123,21 @@ export function ListaPage() {
             <span className="text-xs text-slate-400">{totalSemana} visitas</span>
           </div>
 
-          {todosPacientes.length === 0 && (
+          {loading && (
+            <div className="text-center py-12 text-slate-400 text-sm">
+              Calculando prioridades…
+            </div>
+          )}
+
+          {error && !loading && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              Não consegui falar com o servidor de prioridades.
+              <br />
+              <span className="text-red-500 text-xs">{error.message}</span>
+            </div>
+          )}
+
+          {!loading && !error && todosPacientes.length === 0 && (
             <div className="text-center py-12 text-slate-400 text-sm">
               Nenhuma visita planejada para esta semana.
             </div>
