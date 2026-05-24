@@ -182,75 +182,100 @@ Fonte: https://bvsms.saude.gov.br/bvs/publicacoes/hipertensao_arterial_sistemica
 
 A branch `main` do `vinicius-saraiva/impact-lab-saude-17` já tem o algoritmo de ranqueamento implementado, com schema explícito documentado em `MASTER_CONTEXT.md` §6.4 e codificado em `scripts/gerar_lista_do_dia.py`. **Esta é a baseline a partir da qual os critérios das Partes 1-2 podem refinar o score.**
 
+> ### ⚠️ Aviso de proveniência (importante para o pitch)
+>
+> O título da seção 6.4 no `MASTER_CONTEXT.md` é **"Síntese: Score PRIO-ACS — Adaptado ao Framework Oficial"**. A palavra **"Síntese"** é literal: **os pesos numéricos (35/25/25/15), os incrementos (+15/+20/+25) e os cortes de tier (0-30 / 31-60 / 61-100) foram engenheirados pela equipe**, calibrados pelos achados do dataset. **Não saíram verbatim de nenhuma portaria, manual ou DOCX.**
+>
+> O que é **oficial e auditável** são os **frameworks de origem** que a equipe sintetizou: ICSAP (Portaria SAS/MS 221/2008), Escala de Risco Familiar (Ficha A SIAB/SISAB) e as cadências por linha de cuidado (DOCX SMS-Rio 8 linhas de cuidado).
+>
+> Para o pitch (regra Rio Impact Lab "honesto hoje vs próximo"): **v1 = regras transparentes derivadas de Portaria 221 + Ficha A + Carteira Rio; v2 = ML calibrado em dados reais com supervisão clínica.**
+
 ### 3.1 Score PRIO-ACS (0-100, aditivo) — `scripts/gerar_lista_do_dia.py` + `MASTER_CONTEXT.md` §6.4
 
 **4 componentes aditivos:**
 
 ```
 ICSAP proxy (cap 35):
-  +15 hipertenso     [ICSAP grupo 9]
-  +15 diabético      [ICSAP grupo 13]
-  +15 gestação       [ICSAP grupo 19]
+  +15 hipertenso     [ICSAP grupo 9]    ← grupo: REAL · peso: SÍNTESE
+  +15 diabético      [ICSAP grupo 13]   ← grupo: REAL · peso: SÍNTESE
+  +15 gestação       [ICSAP grupo 19]   ← grupo: REAL · peso: SÍNTESE
 
 Vulnerable life-stage (cap 25, pega o maior — não soma):
-  25 gestante
-  20 faixa_etaria "0-6"
-  15 idoso (65+) com crônica
+  25 gestante                            ← peso: SÍNTESE
+  20 faixa_etaria "0-6"                  ← peso: SÍNTESE
+  15 idoso (65+) com crônica             ← peso: SÍNTESE
 
 Care gap / urgency (cap 25):
-  +15 evento não-eletivo (urgência/internação) nos últimos 60d
-  +10 gap_visita > limite_por_grupo
+  +15 evento não-eletivo nos últimos 60d ← peso e janela 60d: SÍNTESE
+  +10 gap_visita > limite_por_grupo      ← peso: SÍNTESE
 
 Social vulnerability (cap 15):
-  +15 situacao_vulnerabilidade
+  +15 situacao_vulnerabilidade           ← flag: REAL (campo do dataset) · peso: SÍNTESE
 ```
+
+**Detalhamento da proveniência:**
+
+| Elemento | Origem | Evidência |
+|---|---|---|
+| Existência dos 19 grupos ICSAP; grupo 9 = HAS; grupo 13 = DM; grupo 19 = gestação | ✅ **Real** — Portaria SAS/MS nº 221/2008 | `MASTER_CONTEXT.md:357` |
+| Caps 35 / 25 / 25 / 15 e incrementos +15 / +20 / +25 | ⚙️ **Síntese da equipe** | Inventados na seção 6.4 do `MASTER_CONTEXT.md`, criada em 2026-05-24 12:19 |
+| Janela de 60 dias para "evento recente" | ⚙️ **Síntese da equipe** | Não está em nenhum documento oficial citado |
+| Flag `situacao_vulnerabilidade` | ✅ **Real** — campo do dataset anonimizado | README do dataset |
 
 ### 3.2 Limites de gap por grupo (em dias) — `_gap_limit_for_row` no script
 
-| Condição | Gap máximo aceitável | Origem |
-|---|---|---|
-| Gestante | 30 dias | Carteira Rio (mensal) |
-| Criança 0-6 | 45 dias | Aproximação da Carteira Rio (mensal 1m-1a / trimestral 1-2a) |
-| Hipertenso ou Diabético | 90 dias | Carteira Rio (trimestral) |
-| Geral | 180 dias | Carteira Rio (semestral) |
+| Condição | Gap máximo aceitável | Origem | Proveniência |
+|---|---|---|---|
+| Gestante | 30 dias | Carteira Rio p.46/87 (mensal) + DOCX SMS-Rio 8 linhas de cuidado | ✅ **Real** |
+| Criança 0-6 | 45 dias | Aproximação da Carteira Rio (mensal 1m-1a, trimestral 1-2a, semestral 2-6a) | ⚠️ **Mistura**: cadências por faixa são REAIS, mas o valor único 45d é SÍNTESE para acomodar a faixa agregada `0-6` do dataset |
+| Hipertenso ou Diabético | 90 dias | Carteira Rio p.46/87 (trimestral) | ✅ **Real** |
+| Geral | 180 dias | Carteira Rio p.46/87 (semestral para idoso/adulto) | ✅ **Real** |
 
 ### 3.3 Tradução score → tier da Escala de Risco Familiar (SIAB/SISAB)
 
-| Score | Tier | Cadência oficial |
-|---|---|---|
-| 0-30 | habitual | Mensal |
-| 31-60 | médio | Quinzenal a mensal |
-| 61-100 | alto | Semanal a quinzenal |
+| Score | Tier | Cadência oficial | Proveniência |
+|---|---|---|---|
+| 0-30 | habitual | Mensal | Tier + cadência: ✅ **Real** (Ficha A SIAB/SISAB) · Corte numérico 30: ⚙️ **Síntese** |
+| 31-60 | médio | Quinzenal a mensal | Tier + cadência: ✅ **Real** · Cortes 31/60: ⚙️ **Síntese** |
+| 61-100 | alto | Semanal a quinzenal | Tier + cadência: ✅ **Real** · Corte 61: ⚙️ **Síntese** |
+
+> A **existência** dos 3 tiers ("habitual / médio / alto") e suas cadências mensais/quinzenais/semanais é oficial — Ficha A SIAB/SISAB (Ministério da Saúde) e `OFFICIAL_SMS_RIO_FRAMEWORK.md`. **Onde cortar o score (30 e 60)** é decisão da equipe — não existe norma que diga "score ≥ 61 = alto".
 
 ### 3.4 Tradução score → prioridade UI — `scripts/gerar_realdata_frontend.py`
 
-| Score | Prioridade (badge) | Cor |
-|---|---|---|
-| ≥ 70 | crítica | vermelho |
-| 50-69 | alta | laranja |
-| 30-49 | média | amarelo |
-| < 30 | baixa | cinza |
+| Score | Prioridade (badge) | Cor | Proveniência |
+|---|---|---|---|
+| ≥ 70 | crítica | vermelho | ⚙️ **Síntese** — corte UI puramente da equipe |
+| 50-69 | alta | laranja | ⚙️ **Síntese** |
+| 30-49 | média | amarelo | ⚙️ **Síntese** |
+| < 30 | baixa | cinza | ⚙️ **Síntese** |
+
+> Esta camada não tem correspondência oficial — é uma convenção visual interna do app que tenta dar contraste maior do que os 3 tiers SIAB.
 
 ### 3.5 Linha de cuidado primária → qual Ficha aplica — `_linha` no script
 
-| Condição do paciente | Linha de cuidado | JSON ficha |
-|---|---|---|
-| Gestação | Pré-natal/Puerpério | `ficha_b_gestante.json` |
-| Faixa etária 0-6 | Primeira infância | `ficha_c_primeira_infancia.json` |
-| HAS ou DM | Crônico | `ficha_b_cronico.json` |
-| Demais | Cadastro família | `ficha_a_cadastro_familia.json` |
+| Condição do paciente | Linha de cuidado | JSON ficha | Proveniência |
+|---|---|---|---|
+| Gestação | Pré-natal/Puerpério | `ficha_b_gestante.json` | ✅ **Real** — Ficha oficial SMS-Rio v1.0 2022 (código `SMSRIO013_FICHA_B`) |
+| Faixa etária 0-6 | Primeira infância | `ficha_c_primeira_infancia.json` | ✅ **Real** — Ficha oficial SMS-Rio (`SMSRIO001_FICHA_C`) |
+| HAS ou DM | Crônico | `ficha_b_cronico.json` | ✅ **Real** — Ficha oficial SMS-Rio (`SMSRIO019_FICHA_B`) |
+| Demais | Cadastro família | `ficha_a_cadastro_familia.json` | ✅ **Real** — Ficha oficial SIAB (`SMSDC008_SIAB`) |
+
+> A **escolha de qual paciente entra em qual ficha** segue a estrutura oficial das fichas SMS-Rio versão 1.0 (2022). A regra de desempate (gestante vence 0-6, que vence HAS/DM, que vence cadastro) é convenção implícita da equipe — não documentada externamente, mas defensável porque cada ficha mais específica subsume a anterior.
 
 ### 3.6 Triggers críticos por Ficha — `MASTER_CONTEXT.md` §6.2
 
 Sinais que disparam **escalonamento de prioridade** ao serem captados durante a visita:
 
-| Ficha | Trigger |
-|---|---|
-| FICHA B Crônico | P6 = S (foi à UPA/emergência); P7 = S (machucado no pé em DM) |
-| FICHA B Gestante | P5 = S (sangramento < 12 sem); P9 = N (não sentiu o bebê > 25 sem); PA ≥ 140/90 |
-| FICHA C Primeira Infância | P1 = N (sem 1ª consulta em 7d); P6 inclui gemido/cansaço respirar; P9 = S (insegurança alimentar) |
-| FICHA B TB | 2+ doses TDO faltando; P2 inclui urina escura/pele amarelada (hepatotoxicidade) |
-| FICHA A | Horário de visita mais conveniente captado (resolve gap de pacientes invisíveis) |
+| Ficha | Trigger | Proveniência |
+|---|---|---|
+| FICHA B Crônico | P6 = S (foi à UPA/emergência); P7 = S (machucado no pé em DM) | ✅ **Real** — campos das Fichas SMS-Rio v1.0 2022 |
+| FICHA B Gestante | P5 = S (sangramento < 12 sem); P9 = N (não sentiu o bebê > 25 sem); PA ≥ 140/90 | ✅ **Real** — campos da Ficha + corte PA da CAB 32 (alto risco) |
+| FICHA C Primeira Infância | P1 = N (sem 1ª consulta em 7d); P6 inclui gemido/cansaço respirar; P9 = S (insegurança alimentar) | ✅ **Real** — campos da Ficha + sinais de perigo CAB 33 |
+| FICHA B TB | 2+ doses TDO faltando; P2 inclui urina escura/pele amarelada (hepatotoxicidade) | ✅ **Real** — campos da Ficha + sinais clínicos de hepatotoxicidade |
+| FICHA A | Horário de visita mais conveniente captado | ✅ **Real** — campo da Ficha A |
+
+> **A identificação dos triggers críticos é real** — sai dos campos das fichas oficiais SMS-Rio v1.0 2022 e da literatura clínica (CAB 32 e CAB 33). A **decisão de transformá-los em escalonamento de score** é arquitetura da equipe.
 
 ### 3.7 Mapeamento Ficha → boost no score — `MASTER_CONTEXT.md` §6.2
 
@@ -261,6 +286,31 @@ FICHA B Crônico → +15 ICSAP grupo 9 (HAS) ou 13 (DM)
 FICHA C → +20 life-stage (criança 0-6) + indicadores Previne crianças
 FICHA B TB → linha de cuidado diária (TDO) — fora da escala normal
 ```
+
+> Os **boosts numéricos** acima vêm direto dos pesos do §3.1, portanto carregam a mesma proveniência: **grupos ICSAP REAIS, valores SINTÉTICOS**.
+
+### 3.8 ⭐ Auditoria de proveniência — o que é oficial vs. o que é síntese da equipe
+
+Tabela única para defesa no audit/pitch — espelha o que a equipe já reconheceu internamente (`MASTER_CONTEXT.md` §6.4 título + `FRONTEND_EVALUATION.md:75`):
+
+| Componente | Origem | Evidência |
+|---|---|---|
+| Existência dos 19 grupos ICSAP; mapeamento grupo 9 = HAS, 13 = DM, 19 = gestação | ✅ **Real** — Portaria SAS/MS 221/2008 | `MASTER_CONTEXT.md:357` |
+| Escala de Risco Familiar com 3 categorias (habitual / médio / alto) e cadências mensal/quinzenal/semanal | ✅ **Real** — Ficha A SIAB/SISAB (MS) | `MASTER_CONTEXT.md:355` + `OFFICIAL_SMS_RIO_FRAMEWORK.md` |
+| Cadências mínimas por grupo: gestante 30d, criança/grupos pediátricos por faixa, crônicos 90d, geral 180d | ✅ **Real** — DOCX SMS-Rio "8 linhas de cuidado" + Carteira de Serviços APS Rio 2021 pp.46/87 | `MASTER_CONTEXT.md:356` + Parte 2.1 deste doc |
+| Fichas oficiais SMS-Rio v1.0 2022 (A, B Crônico, B Gestante, B TB, C) | ✅ **Real** — SMS-Rio publicou em PDF + JSON dev-ready em `FICHAS/` | `MASTER_CONTEXT.md` §6.2 |
+| Achados do dataset: 49,9% pacientes nunca visitados; 43% gestantes com urgência | ✅ **Real** — perfilagem do dataset anonimizado | `data_profile.json` |
+| **Pesos 35 / 25 / 25 / 15** (caps por componente do score) | ⚙️ **Síntese da equipe** | Não existe em fonte externa — `MASTER_CONTEXT.md` §6.4 criada 2026-05-24 12:19 |
+| **Incrementos +15 / +20 / +25** dentro de cada componente | ⚙️ **Síntese da equipe** | Não existe em fonte externa |
+| **Cortes de tier 0-30 / 31-60 / 61-100** (mapeamento score → tier SIAB) | ⚙️ **Síntese da equipe** | Não existe em fonte externa — o SIAB define as 3 categorias mas não o corte numérico |
+| **Cortes de prioridade UI ≥70 / 50-69 / 30-49 / <30** | ⚙️ **Síntese da equipe** | Camada visual interna — `scripts/gerar_realdata_frontend.py` |
+| **Janela de 60 dias** para "evento não-eletivo recente" | ⚙️ **Síntese da equipe** | Hoje é genérica; Guia ACS p.177 sugere janela específica de 6 meses para queda/internação de idoso |
+| **Limite de gap 45d para criança 0-6** | ⚠️ **Mistura** | Cadências por subfaixa são REAIS na Carteira Rio (mensal/trimestral/semestral); o número único 45d é compromisso para a faixa agregada do dataset |
+
+#### Como apresentar isso no pitch (3 atos: hoje vs próximo)
+
+- **Hoje (v1)** — Score com regras transparentes, auditáveis, derivadas de **Portaria 221/2008 + Ficha A SIAB + Carteira APS Rio 2021**. Pesos calibrados pelos achados empíricos do dataset. Toda decisão de visita pode citar a portaria/manual que a sustenta.
+- **Próximo (v2)** — Calibração dos pesos por ML supervisionado com feedback dos supervisores de equipe; janela do "evento recente" parametrizada por grupo (60d genérico → 6 meses para idoso, 30d para gestante, etc.); separação de gestante alto risco (CAB 32 §5.2.2) vs habitual; captura de TB/Hanseníase e acamado via Ficha para visita diária/mensal.
 
 ---
 
