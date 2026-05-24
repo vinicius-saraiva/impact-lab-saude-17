@@ -11,3 +11,4 @@ data/*.prj
 *.egg-info/
 .venv/
 venv/
+.playwright-mcp/
