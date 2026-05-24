@@ -34,10 +34,18 @@ export function useSync() {
     const lista = await getVisitasPendentes()
     if (lista.length === 0) return
 
+    // URL configurável via env; fallback para a API do backend quando disponível
+    const syncUrl = import.meta.env.VITE_SYNC_URL as string | undefined
+
+    // Sem URL configurada → mantém pendente silenciosamente
+    if (!syncUrl) {
+      setStatus('pending')
+      return
+    }
+
     setStatus('syncing')
     try {
-      // Chama API backend (mock por enquanto)
-      const res = await fetch('/api/sync', {
+      const res = await fetch(syncUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ registros: lista }),
@@ -49,10 +57,11 @@ export function useSync() {
         setPendentes(0)
         setStatus('synced')
       } else {
-        setStatus('error')
+        // Backend retornou erro HTTP — mantém na fila para tentar depois
+        setStatus('pending')
       }
     } catch {
-      // offline ou backend indisponível — não é erro, é esperado
+      // Offline ou backend indisponível — esperado
       setStatus('pending')
     }
   }, [])
