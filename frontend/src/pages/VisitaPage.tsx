@@ -80,7 +80,7 @@ export function VisitaPage() {
     const semana = getPacientesSemana()
     const dias = Array.from(semana.keys()).sort()
     if (dias.length === 0) return
-    getVisitaPacienteNaSemana(id, dias[0], dias[dias.length - 1]).then((v) => {
+    getVisitaPacienteNaSemana(id, dias[0]).then((v) => {
       if (v) setVisitaExistente(v)
     })
   }, [id])

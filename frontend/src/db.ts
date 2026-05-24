@@ -44,12 +44,12 @@ export async function getVisitasHoje(profissionalId: string): Promise<RegistroVi
 export async function getVisitaPacienteNaSemana(
   pacienteId: string,
   inicio: string,
-  fim: string,
 ): Promise<RegistroVisita | undefined> {
+  const hoje = new Date().toISOString().split('T')[0]
   const visitas = await db.visitas
     .where('pacienteId')
     .equals(pacienteId)
-    .and((v) => v.dataVisita >= inicio && v.dataVisita <= fim)
+    .and((v) => v.dataVisita >= inicio && v.dataVisita <= hoje)
     .toArray()
   return visitas[0]
 }

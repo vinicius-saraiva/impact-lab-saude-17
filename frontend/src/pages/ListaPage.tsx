@@ -49,11 +49,11 @@ export function ListaPage() {
 
   useEffect(() => {
     const inicio = diasOrdenados[0]
-    const fim = diasOrdenados[diasOrdenados.length - 1]
+    const hoje = new Date().toISOString().split('T')[0]
     db.visitas
       .where('profissionalId')
       .equals(PROFISSIONAL_ID)
-      .and((v) => v.dataVisita >= inicio && v.dataVisita <= fim)
+      .and((v) => v.dataVisita >= inicio && v.dataVisita <= hoje)
       .toArray()
       .then((visitas) => setVisitadosSemana(new Set(visitas.map((v) => v.pacienteId))))
   }, [])
