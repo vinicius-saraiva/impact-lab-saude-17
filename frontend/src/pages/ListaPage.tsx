@@ -72,6 +72,14 @@ export function ListaPage() {
             <div className="text-blue-200 text-xs">de {totalSemana} visitas</div>
           </div>
         </div>
+        <button
+          onClick={() => navigate('/supervisor')}
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-blue-100 hover:text-white bg-blue-800/60 hover:bg-blue-800 px-3 py-1.5 rounded-full border border-blue-500/40 transition-colors"
+        >
+          <span>📊</span>
+          Painel de gestão
+          <span className="opacity-70">›</span>
+        </button>
         {/* Progress */}
         <div className="mt-3">
           <div className="h-1.5 bg-blue-900 rounded-full overflow-hidden">
