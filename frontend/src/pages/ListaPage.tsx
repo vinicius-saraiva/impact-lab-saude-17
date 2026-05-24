@@ -7,10 +7,12 @@ import { MapaVisitas } from '../components/MapaVisitas'
 import { useSync } from '../hooks/useSync'
 import { db } from '../db'
 import { getPacientesSemana } from '../mockData'
+import { getAuth } from '../auth'
 import type { Paciente } from '../types'
 
-const PROFISSIONAL_ID = 'acs-demo-001'
-const NOME_ACS = 'Ana Paula'
+const auth = getAuth()
+const PROFISSIONAL_ID = auth?.profissionalId ?? 'acs-demo-001'
+const NOME_ACS = auth?.nome ?? 'Cláudia'
 
 const DIAS_PT: Record<string, string> = {
   '0': 'Dom', '1': 'Seg', '2': 'Ter', '3': 'Qua', '4': 'Qui', '5': 'Sex', '6': 'Sáb',
@@ -37,6 +39,7 @@ export function ListaPage() {
   const { pendentes, status, isOnline, sincronizar } = useSync()
   const [visitadosSemana, setVisitadosSemana] = useState<Set<string>>(new Set())
   const [aba, setAba] = useState<'lista' | 'mapa'>('lista')
+  const [pacienteSelecionado, setPacienteSelecionado] = useState<Paciente | null>(null)
 
   const semana = getPacientesSemana()
   const diasOrdenados = Array.from(semana.keys()).sort()
@@ -108,8 +111,46 @@ export function ListaPage() {
       {/* Aba Mapa */}
       {aba === 'mapa' && (
         <div className="flex-1" style={{ minHeight: 0 }}>
-          <MapaVisitas pacientes={todosPacientes} visitados={visitadosSemana} />
+          <MapaVisitas
+            pacientes={todosPacientes}
+            visitados={visitadosSemana}
+            onSelectPaciente={setPacienteSelecionado}
+          />
         </div>
+      )}
+
+      {/* Bottom sheet — paciente selecionado no mapa */}
+      {pacienteSelecionado && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/20"
+            onClick={() => setPacienteSelecionado(null)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl">
+            <div className="flex items-center justify-between px-4 pt-4 pb-1">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Paciente no mapa
+              </span>
+              <button
+                onClick={() => setPacienteSelecionado(null)}
+                className="text-slate-400 text-2xl leading-none w-8 h-8 flex items-center justify-center"
+              >
+                ×
+              </button>
+            </div>
+            <div className="px-4 pb-6">
+              <PacienteCard
+                paciente={pacienteSelecionado}
+                ordem={todosPacientes.findIndex((p) => p.id === pacienteSelecionado.id) + 1}
+                visitado={visitadosSemana.has(pacienteSelecionado.id)}
+                onClick={() => {
+                  setPacienteSelecionado(null)
+                  navigate(`/paciente/${pacienteSelecionado.id}`)
+                }}
+              />
+            </div>
+          </div>
+        </>
       )}
 
       {/* Aba Lista — todos os pacientes da semana */}

@@ -51,16 +51,28 @@ function getCamposFaltando(
   return f
 }
 
+const DRAFT_KEY = (pid: string) => `draft_visita_${pid}`
+
+function loadDraft(pid: string) {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY(pid))
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
 export function VisitaPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const paciente = MOCK_PACIENTES.find((p) => p.id === id)
 
-  const [estavaCasa, setEstavaCasa] = useState<boolean | null>(null)
-  const [recusouVisita, setRecusouVisita] = useState(false)
+  const draft = id ? loadDraft(id) : null
+
+  const [estavaCasa, setEstavaCasa] = useState<boolean | null>(draft?.estavaCasa ?? null)
+  const [recusouVisita, setRecusouVisita] = useState<boolean>(draft?.recusouVisita ?? false)
   const [salvando, setSalvando] = useState(false)
-  const [form, setForm] = useState<Partial<RegistroVisita>>({})
+  const [form, setForm] = useState<Partial<RegistroVisita>>(draft?.form ?? {})
   const [mostrarEncaminhamento, setMostrarEncaminhamento] = useState(false)
+  const [mostrarModalSaida, setMostrarModalSaida] = useState(false)
 
   if (!paciente) {
     return (
@@ -69,6 +81,26 @@ export function VisitaPage() {
         <button onClick={() => navigate('/')} className="block mx-auto mt-4 text-blue-600 underline">Voltar</button>
       </div>
     )
+  }
+
+  const formDirty = estavaCasa !== null || Object.keys(form).length > 0
+
+  const saveDraft = () => {
+    if (formDirty && id) {
+      localStorage.setItem(DRAFT_KEY(id), JSON.stringify({ form, estavaCasa, recusouVisita }))
+    }
+  }
+
+  const discardDraft = () => {
+    if (id) localStorage.removeItem(DRAFT_KEY(id))
+  }
+
+  const handleVoltar = () => {
+    if (formDirty) {
+      setMostrarModalSaida(true)
+    } else {
+      navigate(-1)
+    }
   }
 
   const set = (field: keyof RegistroVisita, value: unknown) =>
@@ -108,6 +140,7 @@ export function VisitaPage() {
       ...form,
     }
     await salvarVisita(registro)
+    discardDraft()
     setSalvando(false)
     if (encaminhar) {
       setMostrarEncaminhamento(true)
@@ -126,7 +159,7 @@ export function VisitaPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-4 pt-10 pb-4 sticky top-0 z-10">
-        <button onClick={() => navigate(-1)} className="text-blue-600 text-sm mb-3 flex items-center gap-1">← Voltar</button>
+        <button onClick={handleVoltar} className="text-blue-600 text-sm mb-3 flex items-center gap-1">← Voltar</button>
         <div className="flex-1">
           <h1 className="text-xl font-bold text-slate-800">{paciente.nome}</h1>
           <p className="text-xs text-slate-400 mt-0.5">{paciente.sexo} · {paciente.faixaEtaria} anos · {paciente.racaCor}</p>
@@ -188,7 +221,7 @@ export function VisitaPage() {
         )}
 
         {foiAtendido && (paciente.hipertenso || paciente.diabetico) && (
-          <SecaoCronico form={form} set={set} isDM={paciente.diabetico} historico={paciente.ultimoRegistroHipertensao} />
+          <SecaoCronico form={form} set={set} isHAS={paciente.hipertenso} isDM={paciente.diabetico} historico={paciente.ultimoRegistroHipertensao} />
         )}
 
         {foiAtendido && paciente.gestante && (
@@ -239,6 +272,39 @@ export function VisitaPage() {
         </div>
       )}
 
+      {/* Modal saída — rascunho */}
+      {mostrarModalSaida && (
+        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
+          <div className="bg-white rounded-t-3xl w-full p-6 space-y-3 max-w-md mx-auto">
+            <div className="text-center">
+              <div className="text-3xl mb-2">📝</div>
+              <h2 className="text-lg font-bold text-slate-800">Visita em andamento</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Você preencheu dados desta visita. O que deseja fazer?
+              </p>
+            </div>
+            <button
+              onClick={() => { saveDraft(); navigate(-1) }}
+              className="w-full bg-blue-600 text-white font-semibold py-3.5 rounded-2xl"
+            >
+              💾 Salvar rascunho e sair
+            </button>
+            <button
+              onClick={() => { discardDraft(); navigate(-1) }}
+              className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-2xl"
+            >
+              🗑️ Descartar e sair
+            </button>
+            <button
+              onClick={() => setMostrarModalSaida(false)}
+              className="w-full text-slate-500 text-sm py-2"
+            >
+              Continuar preenchendo
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Modal encaminhamento */}
       {mostrarEncaminhamento && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
@@ -267,12 +333,14 @@ export function VisitaPage() {
 
 // ─── SecaoCronico — Ficha B (HAS + DM) ────────────────────────────────────────
 
-function SecaoCronico({ form, set, isDM, historico }: FormSectionProps & {
+function SecaoCronico({ form, set, isHAS, isDM, historico }: FormSectionProps & {
+  isHAS: boolean
   isDM: boolean
   historico?: import('../types').RegistroHipertensao
 }) {
-  const titulo = isDM && (form as { hipertenso?: boolean }).hipertenso
-    ? '❤️ Hipertensão + Diabetes' : isDM ? '💉 Diabetes' : '❤️ Hipertensão'
+  const titulo = isHAS && isDM
+    ? '❤️ Hipertensão + Diabetes'
+    : isDM ? '💉 Diabetes' : '❤️ Hipertensão'
 
   return (
     <div className="rounded-2xl shadow-sm border-2 border-blue-300 overflow-hidden">

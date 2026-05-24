@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import L from 'leaflet'
 import type { Paciente, Prioridade } from '../types'
-import { EQUIPE_LAT, EQUIPE_LNG } from '../mockData'
+import { EQUIPE_LAT, EQUIPE_LNG, ACS_LAT, ACS_LNG } from '../mockData'
 
 const CORES: Record<Prioridade, string> = {
   critica: '#dc2626',
@@ -14,7 +13,7 @@ const CORES: Record<Prioridade, string> = {
 function pinPaciente(prioridade: Prioridade, visitado: boolean) {
   const cor = visitado ? '#94a3b8' : CORES[prioridade]
   return L.divIcon({
-    html: `<div style="width:22px;height:22px;border-radius:50%;background:${cor};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5)"></div>`,
+    html: `<div style="width:22px;height:22px;border-radius:50%;background:${cor};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>`,
     className: 'leaflet-div-icon-paciente',
     iconSize: [22, 22],
     iconAnchor: [11, 11],
@@ -24,7 +23,15 @@ function pinPaciente(prioridade: Prioridade, visitado: boolean) {
 
 const PIN_UNIDADE = L.divIcon({
   html: `<div style="width:28px;height:28px;border-radius:50%;background:#1d4ed8;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:14px">🏥</div>`,
-  className: 'leaflet-div-icon-unidade',
+  className: '',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16],
+})
+
+const PIN_ACS = L.divIcon({
+  html: `<div style="width:28px;height:28px;border-radius:50%;background:#059669;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:14px">👩</div>`,
+  className: '',
   iconSize: [28, 28],
   iconAnchor: [14, 14],
   popupAnchor: [0, -16],
@@ -33,12 +40,17 @@ const PIN_UNIDADE = L.divIcon({
 interface Props {
   pacientes: Paciente[]
   visitados: Set<string>
+  onSelectPaciente: (p: Paciente) => void
 }
 
-export function MapaVisitas({ pacientes, visitados }: Props) {
-  const navigate = useNavigate()
+export function MapaVisitas({ pacientes, visitados, onSelectPaciente }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
+  const onSelectRef = useRef(onSelectPaciente)
+  const pacientesRef = useRef(pacientes)
+
+  useEffect(() => { onSelectRef.current = onSelectPaciente }, [onSelectPaciente])
+  useEffect(() => { pacientesRef.current = pacientes }, [pacientes])
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
@@ -51,43 +63,28 @@ export function MapaVisitas({ pacientes, visitados }: Props) {
       maxZoom: 19,
     }).addTo(map)
 
+    // Pin da unidade de saúde
     L.marker([EQUIPE_LAT, EQUIPE_LNG], { icon: PIN_UNIDADE })
       .addTo(map)
       .bindPopup('<b>Clínica da Família</b><br><span style="font-size:11px;color:#64748b">Ponto de partida</span>')
 
+    // Pin da ACS
+    L.marker([ACS_LAT, ACS_LNG], { icon: PIN_ACS })
+      .addTo(map)
+      .bindPopup('<b>Cláudia (você)</b><br><span style="font-size:11px;color:#64748b">Sua posição atual</span>')
+
+    // Pins dos pacientes — clique abre bottom sheet via callback
     for (const p of pacientes) {
       const visitado = visitados.has(p.id)
-      const htmlPopup = `
-        <div style="min-width:180px;padding:2px 0">
-          <div style="font-weight:700;font-size:14px;margin-bottom:3px">${p.nome}</div>
-          <div style="font-size:12px;color:#64748b;margin-bottom:2px">${p.faixaEtaria}a · ${p.distanciaKm.toFixed(1).replace('.', ',')} km da unidade</div>
-          <div style="font-size:11px;color:#64748b;margin-bottom:8px;line-height:1.4">${p.motivoPrioridade}</div>
-          ${visitado
-            ? '<span style="font-size:12px;color:#16a34a;font-weight:700">✓ Visitado</span>'
-            : `<button data-pid="${p.id}" style="background:#1d4ed8;color:white;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;width:100%;touch-action:manipulation">Ver paciente →</button>`
-          }
-        </div>
-      `
       L.marker([p.lat, p.lng], { icon: pinPaciente(p.prioridade, visitado) })
         .addTo(map)
-        .bindPopup(htmlPopup, { maxWidth: 240 })
+        .on('click', () => {
+          const pac = pacientesRef.current.find((x) => x.id === p.id) ?? p
+          onSelectRef.current(pac)
+        })
     }
-
-    // Event delegation: captura clique no botão dentro de qualquer popup
-    const container = containerRef.current
-    function onContainerClick(e: MouseEvent | TouchEvent) {
-      const target = (e.target as HTMLElement).closest<HTMLElement>('[data-pid]')
-      if (target?.dataset.pid) {
-        map.closePopup()
-        navigate(`/paciente/${target.dataset.pid}`)
-      }
-    }
-    container.addEventListener('click', onContainerClick)
-    container.addEventListener('touchend', onContainerClick)
 
     return () => {
-      container.removeEventListener('click', onContainerClick)
-      container.removeEventListener('touchend', onContainerClick)
       map.remove()
       mapRef.current = null
     }
@@ -106,6 +103,10 @@ export function MapaVisitas({ pacientes, visitados }: Props) {
         <span className="flex items-center gap-1">
           <span style={{ background: '#94a3b8' }} className="inline-block w-3 h-3 rounded-full" />
           Visitado
+        </span>
+        <span className="flex items-center gap-1">
+          <span style={{ background: '#059669' }} className="inline-block w-3 h-3 rounded-full" />
+          Você
         </span>
       </div>
       <div ref={containerRef} style={{ flex: 1, minHeight: 0 }} />

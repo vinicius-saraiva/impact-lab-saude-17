@@ -19,6 +19,8 @@ export function PacientePage() {
     )
   }
 
+  const hasDraft = !!localStorage.getItem(`draft_visita_${p.id}`)
+
   const ultimaVisitaFmt = p.ultimaVisita
     ? new Date(p.ultimaVisita + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
     : 'Nunca visitado'
@@ -127,11 +129,16 @@ export function PacientePage() {
 
       {/* Botão fixo na base */}
       <div className="px-4 py-4 bg-white border-t border-slate-200">
+        {hasDraft && (
+          <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-2 text-center">
+            📝 Rascunho salvo — campos já preenchidos anteriormente
+          </p>
+        )}
         <button
           onClick={() => navigate(`/visita/${p.id}`)}
           className="w-full bg-blue-600 text-white font-bold text-base py-4 rounded-2xl active:scale-[0.98] transition-transform"
         >
-          Começar visita
+          {hasDraft ? '▶ Continuar visita' : 'Começar visita'}
         </button>
       </div>
     </div>

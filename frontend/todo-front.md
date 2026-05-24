@@ -23,22 +23,28 @@
 - [x] **`precisaEncaminhamento`** — auto-computed quando qualquer `nao_sei` ou urgência; modal pós-salvar
 - [x] **Enums** — `RespostaSN`, `Frequencia5pt`, `MudancaEstiloVida`, `GanhoPesoGestante`, `AlimentacaoCrianca`, `SinalRiscoCrianca`, `OndeDormeCrianca`
 - [x] **Alertas/banners** — P6 Crônico Sim, P5 Gestante Sim, P9 Gestante Não, sinais críticos criança, pé diabético
-- [x] **Leaflet + OpenStreetMap** — `MapaVisitas`, tab Lista/Mapa, pins coloridos por prioridade, popup com botão navegar
+- [x] **Leaflet + OpenStreetMap** — `MapaVisitas`, tab Lista/Mapa, pins coloridos por prioridade, bottom sheet ao clicar no pin
 - [x] **Tela de paciente** (`/paciente/:id`) — dados demográficos, score, localização, último registro, botão "Começar visita"
 - [x] **Validação de campos obrigatórios** — botão "Salvar" bloqueado com lista de campos faltando por perfil
+- [x] **Login mock** — tela `/login` com ID + senha, credenciais hardcoded, rotas protegidas
+- [x] **Pin da ACS no mapa** — posição mock (Cláudia) próxima aos pacientes priorizados
+- [x] **Bottom sheet no mapa** — clique no pin abre card do paciente na base da tela; toque no card navega para /paciente/:id
+- [x] **Bug Maria F.** — SecaoCronico agora recebe `isHAS` prop; título correto "Hipertensão + Diabetes"
+- [x] **Draft de visita** — rascunho salvo no localStorage ao preencher; carregado ao reabrir; apagado ao salvar
+- [x] **Modal de saída** — ao clicar Voltar com dados preenchidos: Salvar rascunho / Descartar / Continuar
+- [x] **"Continuar visita"** — PacientePage mostra botão diferente e aviso de rascunho se draft existir
 
 ---
 
 ## 🔴 Must have — ainda pendente
 
 ### Mapa
-- [ ] `navigator.geolocation` para posicionar a ACS no mapa (fallback = ponto da equipe)
+- [ ] `navigator.geolocation` para posição real da ACS (hoje usa lat/lng mock hardcoded)
 
 ### Dados / API
-- [ ] Substituir `mockData.ts` por dados reais da API (filtrado por `equipe_id` do ACS logado)
-- [ ] Login por `profissional_id` (simples, sem OAuth) — hoje hardcoded como `'acs-demo-001'`
-- [ ] Endpoint `/visitas/semana?profissional_id=X&semana=YYYY-WW`
-- [ ] Endpoint `/sync` — envia fila offline ao backend
+- [ ] Substituir `mockData.ts` por dados reais da API Supabase (`priorizacao_pacientes` RPC)
+- [ ] Integrar `salvarVisita` com `supabase.from('visitas_capturadas').insert()`
+- [ ] Substituir `useSync` mock por chamada Supabase real
 
 ### Apresentação / entrega
 - [ ] README hackathon: demo video, link do app, arquitetura, impacto (1.55M horas/ano)
@@ -58,10 +64,9 @@
 
 ### Dados
 - [ ] DPP calculado a partir da DUM (hoje só semana gestacional é calculada)
-- [ ] Score engine no backend (FastAPI + DuckDB sobre parquets)
 
 ---
 
 ## Deploy
 - [x] Deploy frontend — https://frontend-psi-black-9cdy0n3cqq.vercel.app
-- [ ] Deploy backend FastAPI (Fly.io ou Railway)
+- [ ] Integração Supabase (backend dev está fazendo)

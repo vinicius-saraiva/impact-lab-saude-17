@@ -4,6 +4,10 @@ import type { Paciente } from './types'
 export const EQUIPE_LAT = -22.928956
 export const EQUIPE_LNG = -43.233984
 
+// Posição mock da ACS (Cláudia) — próxima a pacientes de alta prioridade
+export const ACS_LAT = -22.942
+export const ACS_LNG = -43.251
+
 // Gera link Google Maps apenas para o endereço do paciente (sem sugestão de rota)
 export function googleMapsUrl(paciente: Paciente): string {
   return `https://www.google.com/maps/search/?api=1&query=${paciente.lat},${paciente.lng}`
