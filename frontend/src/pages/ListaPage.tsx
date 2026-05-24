@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { PrioridadeBadge } from '../components/PrioridadeBadge'
 import { CondicaoBadge } from '../components/CondicaoBadge'
 import { SyncBar } from '../components/SyncBar'
+import { MapaVisitas } from '../components/MapaVisitas'
 import { useSync } from '../hooks/useSync'
 import { db } from '../db'
 import { getPacientesSemana } from '../mockData'
@@ -29,6 +30,7 @@ export function ListaPage() {
   const navigate = useNavigate()
   const { pendentes, status, isOnline, sincronizar } = useSync()
   const [visitadosSemana, setVisitadosSemana] = useState<Set<string>>(new Set())
+  const [aba, setAba] = useState<'lista' | 'mapa'>('lista')
   const [diaAtivo, setDiaAtivo] = useState<string>(() => {
     const hoje = new Date().toISOString().split('T')[0]
     const semanaTemp = getPacientesSemana()
@@ -58,7 +60,7 @@ export function ListaPage() {
     .filter((p) => visitadosSemana.has(p.id)).length
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-blue-700 text-white px-4 pt-10 pb-5">
         <div className="flex items-start justify-between">
@@ -119,8 +121,38 @@ export function ListaPage() {
       {/* Sync bar */}
       <SyncBar pendentes={pendentes} status={status} isOnline={isOnline} onSync={sincronizar} />
 
-      {/* Lista do dia */}
-      <div className="flex-1 px-4 py-4 space-y-3">
+      {/* Abas Lista / Mapa */}
+      <div className="bg-white border-b border-slate-200 px-4">
+        <div className="flex gap-1">
+          {(['lista', 'mapa'] as const).map((a) => (
+            <button
+              key={a}
+              onClick={() => setAba(a)}
+              className={`py-2.5 px-5 text-sm font-semibold border-b-2 transition-colors ${
+                aba === a
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {a === 'lista' ? 'Lista' : 'Mapa'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Aba Mapa */}
+      {aba === 'mapa' && (
+        <div className="flex-1" style={{ minHeight: 0 }}>
+          <MapaVisitas
+            pacientes={Array.from(semana.values()).flat()}
+            visitados={visitadosSemana}
+          />
+        </div>
+      )}
+
+      {/* Aba Lista */}
+      {aba === 'lista' && (
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
             {pacientesDia.length} visitas planejadas
@@ -144,6 +176,7 @@ export function ListaPage() {
           />
         ))}
       </div>
+      )}
     </div>
   )
 }
