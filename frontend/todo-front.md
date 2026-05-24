@@ -84,7 +84,7 @@ Cadência: mensal (≥7 visitas/ano para <1 ano). Até 30 visitas.
 - [ ] procura_em_caso_doenca (multi-select: farmácia / UBS / hospital público / rede privada / etc.)
 
 ### Enums — corrigir `types.ts`
-- [ ] `RacaCor` está incompleto — adicionar `'Amarela'` e `'Indígena'` (código oficial SMS-Rio tem 5 valores)
+- [x] `RacaCor` corrigido — Branca / Preta / Parda / Amarela / Indígena / Outros
 - [ ] Adicionar `frequencia_5pt`, `mudancaEstiloVida`, `ganhoPersoGestante`, `alimentacaoCrianca`, `sinaisRiscoCrianca`, `ondeDormeCrianca`
 
 ---
@@ -111,9 +111,9 @@ Score aditivo 0–100, 4 componentes:
 - Care gap (25pts) — dias desde última consulta × tipo (urgência vs rotina)
 - Social vulnerability (15pts) — renda ≤½ SM, situação de rua, violência doméstica
 
-- [ ] Implementar cálculo no frontend (mockData.ts) com os 4 componentes
-- [ ] Badge de prioridade na lista de pacientes (cor = score range: verde/amarelo/laranja/vermelho)
-- [ ] `motivoPrioridade` na VisitaPage deve vir do score, não de texto diagnóstico hardcoded
+- [x] Cálculo nos dados mock (mockData.ts) — scores reais dos parquets (18 pacientes, equipe 0206636a)
+- [ ] Badge numérico de score na lista (cor = score range: verde/amarelo/laranja/vermelho)
+- [x] `motivoPrioridade` factual, derivado do score — sem texto diagnóstico hardcoded
 
 ---
 
@@ -147,9 +147,9 @@ Restrições validadas em campo:
 - Offline obrigatório — não pode depender de 4G na comunidade
 
 - [ ] Feedback visual ao salvar (toast de confirmação)
-- [ ] Mapa / direções para o endereço do paciente (link Google Maps — abre app externo)
-- [ ] Modo escuro (acessibilidade ao sol)
-- [ ] Indicador claro de status offline/online (sync bar já existe — refinir)
+- [x] Distância do ACS para o paciente na lista (km) — ACS decide a rota
+- [x] Link Google Maps no formulário — abre endereço do paciente (sem sugestão de rota)
+- [ ] Indicador claro de status offline/online (sync bar já existe — refinar)
 - [ ] Notificação "paciente tem consulta amanhã — avisar durante visita"
 
 ---
