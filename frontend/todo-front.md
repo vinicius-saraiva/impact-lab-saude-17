@@ -1,161 +1,144 @@
 # Frontend TODOs — ACS Visitas
 
-## Em foco agora
+## Concluído
 - [x] Lista semanal (Seg–Sex, máx 5/dia, default segunda)
 - [x] Formulário condicional por tipo de paciente (hipertenso, gestante, diabético, criança, vulnerável)
 - [x] Dados gerais do paciente (raça/cor, vulnerabilidade)
 - [x] Offline-first com IndexedDB (Dexie) + sync bar
 - [x] PWA configurável para instalar no Android
-- [x] **Form hipertensão** — sub-form dedicado com borda azul, ficha histórica (pressão, medicação, sintomas) + perguntas simuladas
-- [x] **Dados pré-existentes do paciente** — card "Último registro" com 150/95 · medicação · sintomas acima das perguntas
-- [x] **Testes de IndexedDB** — 23 testes com fake-indexeddb + Vitest (persistência, sync, campos clínicos, fluxo offline→sync)
-
----
-
-## Forms — Fichas Oficiais SMS-Rio 2022
-
-### Ficha B Crônico (HAS / DM / Asma / DPOC / Idoso) — `ficha_b_cronico.json`
-Cadência: mensal (quinzenal se descompensado). 14 perguntas por visita.
-
-- [ ] **P1** — Nas duas últimas semanas você esqueceu alguma dose da medicação? (Sim/Não)
-- [ ] **P2** — Com que frequência você sente que é difícil lembrar de tomar o remédio? (Sempre / Quase sempre / Às vezes / Quase nunca / Nunca)
-- [ ] **P3** — Você sente algum desconforto causado pela medicação? (Sim/Não)
-- [ ] **P4** — Você tem alguma dificuldade ou dúvida em relação ao tratamento? (Sim/Não)
-- [ ] **P5** — Você está passando por alguma mudança de estilo de vida? (Não / Cessando tabagismo / Iniciando atividade física / Mudando a alimentação)
-- [ ] **P6** — Você precisou ser atendido em UPA ou Emergência? (Sim/Não) ⚠️ **SIM → alerta imediato + bundle visita urgente**
-- [ ] **P7** (DM) — Você está com algum machucado no pé? (Sim/Não) → SIM: encaminhamento prioritário
-- [ ] **P8** (Asma/DPOC) — Sua tosse piorou nas últimas semanas? (Sim/Não)
-- [ ] **P9–P14** (Idoso vulnerável) — cuidador presente, consegue responder, deixou tomar dose, refeições/dia (0–4+), ferida
-- [ ] Campo livre "Informações / observações da visita" (1000 chars)
-
-Enums novos necessários em `types.ts`:
-- `frequencia_5pt`: Sempre / Quase sempre / Às vezes / Quase nunca / Nunca
-- `mudancaEstiloVida`: Não / Cessando tabagismo / Iniciando atividade física / Mudando a alimentação
-
-Regras de escalonamento (RN004–RN007):
-- P6 == Sim → visita imediata + alerta supervisor
-- P1 == Sim OU P12 == Sim por 2+ visitas seguidas → bundle de adesão
-- P7 == Sim (DM) → encaminhamento + foto se possível
-- 2+ alertas seguidos → cadência quinzenal
-
-### Ficha B Gestante — `ficha_b_gestante.json`
-Cadência: mensal (risco habitual) · semanal (alto risco). Até 48 visitas.
-
-- [ ] Campos de marcos: DUM + DPP (calculado: DUM + 280 dias)
-- [ ] Semana gestacional calculada automaticamente: `Math.floor((dataVisita − DUM) / 7)`
-- [ ] **P1** (0–41sem) — Você mediu a pressão? (Sim/Não)
-- [ ] **P2** (0–41sem) — Precisou ir à UPA ou maternidade este mês? (Sim/Não) ⚠️ **SIM → indicação de gravidez de risco**
-- [ ] **P3** (0–41sem) — Realizou os exames solicitados? (Sim/Não)
-- [ ] **P4** (0–12sem) — Está enjoando? (Sim/Não)
-- [ ] **P5** (0–12sem) — Teve algum sangramento? (Sim/Não) ⚠️ **SIM < 12sem → URGÊNCIA risco de aborto**
-- [ ] **P6** (0–24sem) — Teve ardência ao urinar? (Sim/Não) → SIM: triagem ITU
-- [ ] **P7** (13–41sem) — Ganho de peso: Adequado / Muito peso / Pouco peso
-- [ ] **P8** (13–41sem) — Tem inchaço nas pernas? (Sim/Não) → triagem pré-eclâmpsia se SIM + PA elevada
-- [ ] **P9** (25–41sem) — Sentiu o bebê mexer nas últimas 24h? (Sim/Não) ⚠️ **NÃO → URGÊNCIA encaminhamento imediato**
-- [ ] **P10** (25–41sem) — Visitou a maternidade de referência? (Sim/Não)
-- [ ] Fatores de risco (multi-select → classifica alto risco → cadência semanal):
-  - Pressão alta / Diabetes / 40 anos ou mais / Menos de 15 anos
-  - 6 ou mais gestações / Tentativa de aborto nesta gestação / Parto prematuro/Aborto prévio
-- [ ] PA sistólica/diastólica (campos opcionais) + alert PA ≥ 140/90
-
-### Ficha C Primeira Infância (0–6 anos) — `ficha_c_primeira_infancia.json`
-Cadência: mensal (≥7 visitas/ano para <1 ano). Até 30 visitas.
-
-- [ ] Idade em meses calculada automaticamente: `Math.floor((dataVisita − dataNascimento) / 30.44)`
-- [ ] **P1** (0–28 dias) — Realizou a primeira consulta em até 7 dias? ⚠️ **NÃO → URGÊNCIA encaminhamento**
-- [ ] **P2** (0–5m) — Onde dorme a criança? (Berço / Chão / Cama com outras pessoas / Sofá) → triagem SMSL
-- [ ] **P3** (0–6a) — Está comparecendo às consultas? (Sim/Não + justificativa se Não)
-- [ ] **P4** (0–6a) — Vacinação em dia? (Sim/Não) → NÃO: encaminhar para campanha
-- [ ] **P5** (0–6a) — Alimentação: LM Exclusivo / LM+água/chá / LM+outro leite / Outro leite / etc.
-- [ ] **P6** (0–6a) — Sinais de risco (multi-select): Cansaço / Febre / Tosse / Diarreia / Cansaço ao respirar / Gemido / Não suga/engole / Vômitos / Internação / Lesões de pele ⚠️ **sinais críticos → URGÊNCIA**
-- [ ] **P7** (0–6a) — Mãe percebeu alteração no desenvolvimento? → SIM: puericultura especializada
-- [ ] **P8** (0–6a) — Perfil BPC mas não está recebendo? → SIM: assistente social
-- [ ] **P9** (0–6a) — Comida acabou antes de ter dinheiro no último mês? → SIM: CRAS + Bolsa Família
-- [ ] **P10** (6m–6a) — Matriculada em creche/pré-escola?
-- [ ] **P11** (6m–6a) — Faltou creche? (motivo se Sim)
-- [ ] **P12** (4–6a) — Tem acesso a atividade de contraturno?
-- [ ] Calendário vacinal completo (BCG, Hep B, Pentavalente, Polio, Pneumo, Rotavírus, Meningo, etc.)
-
-### Ficha A — Cadastro Família (`ficha_a_cadastro_familia.json`)
-- [ ] Campos de moradia: tipo_domicilio, tipo_acesso, material_paredes, abastecimento_agua, tratamento_agua, escoamento_sanitario, destino_lixo
-- [ ] Renda familiar faixa: Até ½ SM / Mais de ½–1 SM / 1–2 SM / 2–5 SM / >5 SM / Doações
-- [ ] Horário disponível para visita: Manhã / Tarde / Noite / Sábado / Domingo (multi-select)
-- [ ] situacao_familiar (6 opções de arranjo domiciliar)
-- [ ] procura_em_caso_doenca (multi-select: farmácia / UBS / hospital público / rede privada / etc.)
-
-### Enums — corrigir `types.ts`
+- [x] Form hipertensão — sub-form dedicado, ficha histórica (pressão, medicação, sintomas)
+- [x] Dados pré-existentes do paciente — card "Último registro" acima das perguntas
+- [x] Testes de IndexedDB — 23 testes (persistência, sync, campos clínicos, offline→sync)
+- [x] PRIO-ACS score calculado dos parquets reais (18 pacientes, equipe 0206636a)
+- [x] `motivoPrioridade` factual — sem texto diagnóstico
+- [x] Distância do ACS para o paciente na lista (km) — ACS decide a rota
+- [x] Link Google Maps no formulário — endereço do paciente (sem sugestão de rota)
 - [x] `RacaCor` corrigido — Branca / Preta / Parda / Amarela / Indígena / Outros
-- [ ] Adicionar `frequencia_5pt`, `mudancaEstiloVida`, `ganhoPersoGestante`, `alimentacaoCrianca`, `sinaisRiscoCrianca`, `ondeDormeCrianca`
+- [x] Deploy Vercel — https://frontend-psi-black-9cdy0n3cqq.vercel.app
 
 ---
 
-## Escalação e Alertas (lógica de negócio — MASTER_CONTEXT)
+## 🔴 Must have — 3h restantes
 
-Estes padrões devem virar badges/alertas visuais na UI, nunca texto diagnóstico:
+### 1. Formulários oficiais (substituir perguntas mock)
 
-- [ ] **P6 Crônico Sim** → badge "⚠️ Urgência — UPA/Emergência" + notificar supervisor
-- [ ] **P9 Gestante Não** (>25sem) → badge "🚨 Não sentiu bebê mexer — encaminhar imediato"
-- [ ] **P5 Gestante Sim** (<12sem) → badge "🚨 Sangramento — risco de aborto"
-- [ ] **P6 Criança sinais críticos** → badge "🚨 Sinal de risco — atendimento imediato"
-- [ ] **Adesão medicamentosa** (P1/P2 Crônico) flagged 2+ visitas → badge "Adesão irregular"
-- [ ] **Pé diabético** (P7 DM) → badge "🦶 Ferida no pé — encaminhamento + foto"
-- [ ] Anti-pattern PRISMATIC: **nunca mostrar score sem action bundle** — cada alerta precisa de instrução concreta (o que fazer, não só o score)
+**Ficha B Crônico — substituir SecaoHipertensao pelas P1–P6 reais**
+- [ ] P1 — Nas últimas 2 semanas, esqueceu alguma dose? (Sim / Não / Não sei)
+- [ ] P2 — Com que frequência é difícil lembrar? (Sempre / Quase sempre / Às vezes / Quase nunca / Nunca / Não sei)
+- [ ] P3 — Sente desconforto pela medicação? (Sim / Não / Não sei)
+- [ ] P4 — Tem dificuldade ou dúvida sobre o tratamento? (Sim / Não / Não sei)
+- [ ] P5 — Mudança de estilo de vida? (Não / Cessando tabagismo / Iniciando atividade física / Mudando alimentação)
+- [ ] P6 — Precisou de UPA ou Emergência? (Sim / Não) ⚠️ SIM → badge alerta + flag encaminhamento
+- [ ] P7 DM — Machucado no pé? (Sim / Não / Não sei) → SIM: encaminhamento + nota
+- [ ] Campo livre observações (1000 chars)
+
+**Ficha B Gestante — substituir SecaoGestante**
+- [ ] DUM + DPP + semana gestacional calculada automaticamente
+- [ ] P1 (0–41sem) — Mediu a pressão? (Sim / Não / Não sei)
+- [ ] P2 (0–41sem) — Precisou de UPA/maternidade? (Sim / Não) ⚠️ SIM → urgência
+- [ ] P3 (0–41sem) — Realizou os exames solicitados? (Sim / Não / Não sei)
+- [ ] P4 (0–12sem) — Está enjoando? (Sim / Não)
+- [ ] P5 (0–12sem) — Teve sangramento? (Sim / Não) ⚠️ SIM → urgência
+- [ ] P6 (0–24sem) — Ardência ao urinar? (Sim / Não / Não sei)
+- [ ] P7 (13–41sem) — Ganho de peso (Adequado / Muito peso / Pouco peso / Não sei)
+- [ ] P8 (13–41sem) — Inchaço nas pernas? (Sim / Não / Não sei)
+- [ ] P9 (25–41sem) — Sentiu bebê mexer nas últimas 24h? (Sim / Não) ⚠️ NÃO → urgência imediata
+- [ ] P10 (25–41sem) — Visitou a maternidade de referência? (Sim / Não)
+- [ ] Fatores de risco (multi-select → alto risco → cadência semanal)
+
+**Ficha C Criança (0–6 anos) — substituir SecaoCrianca**
+- [ ] Idade em meses calculada automaticamente
+- [ ] P1 (0–28d) — Primeira consulta em até 7 dias? ⚠️ NÃO → urgência
+- [ ] P2 (0–5m) — Onde dorme? (Berço / Chão / Cama com outros / Sofá) → triagem SMSL
+- [ ] P3 — Comparecendo às consultas? (Sim / Não / Não sei)
+- [ ] P4 — Vacinação em dia? (Sim / Não / Não sei)
+- [ ] P5 — Alimentação (enum LM / misto / outros)
+- [ ] P6 — Sinais de risco (multi-select) ⚠️ sinais críticos → urgência
+- [ ] P7 — Alteração no desenvolvimento? (Sim / Não / Não sei)
+- [ ] P8 — Perfil BPC sem benefício? (Sim / Não / Não sei)
+- [ ] P9 — Comida acabou antes do dinheiro? (Sim / Não)
+
+### 2. "Não sei" em campos clínicos
+- [ ] Todo campo clínico que admite incerteza deve ter terceira opção: **Não sei / Não sabe informar**
+- [ ] Valor `'nao_sei'` salvo no IndexedDB junto com o registro
+- [ ] Quando qualquer campo retornar `'nao_sei'`, flag `precisaEncaminhamento = true` no `RegistroVisita`
+- [ ] Ao salvar, se `precisaEncaminhamento == true` → mostrar banner/card: **"Indicar consulta necessária para este paciente"** com botão confirmar
+- [ ] Flag salvo no registro offline e sincronizado — permite supervisor filtrar "pacientes a encaminhar"
+
+### 3. Localização da ACS + mapa integrado na lista
+
+**Opção recomendada para 3h: Leaflet + OpenStreetMap (react-leaflet)**
+- Sem API key, open source, funciona offline com tiles em cache
+- Instala em 1 linha: `npm i react-leaflet leaflet`
+- Mostra pin azul para a ACS (ponto fixo da equipe = `EQUIPE_LAT/LNG` do parquet)
+- Pins coloridos por prioridade (vermelho/laranja/amarelo/verde) para cada paciente da semana
+- Clique no pin → abre VisitaPage
+- Distâncias já calculadas no mockData — exibir como label no pin
+
+- [ ] Instalar `react-leaflet` + `leaflet` + `@types/leaflet`
+- [ ] Componente `MapaVisitas` na ListaPage — aba "Lista" / "Mapa" (tab toggle)
+- [ ] Pin da unidade (azul) em `EQUIPE_LAT, EQUIPE_LNG`
+- [ ] Pins de pacientes coloridos por `prioridade` (critica=vermelho, alta=laranja, media=amarelo, baixa=verde)
+- [ ] Popup no pin: nome, prioScore, distanciaKm, botão "Registrar visita"
+- [ ] Posição da ACS: usar `navigator.geolocation` se disponível; fallback = ponto da equipe
+
+> **Alternativas descartadas para 3h:**
+> - Google Maps Static API: imagem não-interativa (5min mas inútil para demo real)
+> - Google Maps JS: requer API key com billing habilitado
+> - Mapbox: requer API key, mais complexo
 
 ---
 
-## PRIO-ACS Score (backend — MASTER_CONTEXT)
+## 🟡 Testes offline — nice to have
 
-Score aditivo 0–100, 4 componentes:
-- ICSAP proxy (35pts) — diagnósticos sensíveis à atenção primária (HAS, DM, asma)
-- Life-stage (25pts) — gestante alto risco, criança <1 ano, idoso ≥75 anos
-- Care gap (25pts) — dias desde última consulta × tipo (urgência vs rotina)
-- Social vulnerability (15pts) — renda ≤½ SM, situação de rua, violência doméstica
+Os testes de IndexedDB (23) já cobrem o fluxo lógico offline. Para simular o ciclo completo na UI:
 
-- [x] Cálculo nos dados mock (mockData.ts) — scores reais dos parquets (18 pacientes, equipe 0206636a)
-- [ ] Badge numérico de score na lista (cor = score range: verde/amarelo/laranja/vermelho)
-- [x] `motivoPrioridade` factual, derivado do score — sem texto diagnóstico hardcoded
+- [ ] Teste Vitest: mockar `navigator.onLine = false` → salvar visita → `navigator.onLine = true` → disparar sync → verificar `synced = true`
+- [ ] Vitest `useSync` hook — testar: fila pendente acumula offline, sync dispara ao voltar online
+- [ ] Teste de conflito: dois registros para o mesmo `pacienteId` no mesmo dia → merge strategy (último salvo vence, com flag `conflito: true`)
+
+> Para a demo ao vivo: o sync bar existente já mostra o estado visualmente. Mostrar no celular: colocar em modo avião, registrar visita, tirar do avião → sync automático.
+
+---
+
+## Enums novos em `types.ts`
+- [ ] `RespostaSN`: `'sim' | 'nao' | 'nao_sei'` — substituir boolean em campos clínicos que admitem incerteza
+- [ ] `Frequencia5pt`: `'sempre' | 'quase_sempre' | 'as_vezes' | 'quase_nunca' | 'nunca' | 'nao_sei'`
+- [ ] `MudancaEstiloVida`: `'nao' | 'tabagismo' | 'atividade_fisica' | 'alimentacao'`
+- [ ] `GanhoPesoGestante`: `'adequado' | 'muito' | 'pouco' | 'nao_sei'`
+- [ ] `AlimentacaoCrianca`: enum 8 valores (LM exclusivo → outros alimentos)
+- [ ] `SinalRiscoCrianca`: multi-select 12 valores
+- [ ] `OndeDoirmeCrianca`: `'berco' | 'chao' | 'cama_compartilhada' | 'sofa'`
+- [ ] Adicionar `precisaEncaminhamento?: boolean` em `RegistroVisita`
+
+---
+
+## Escalação e Alertas
+- [ ] P6 Crônico Sim → banner "⚠️ Urgência — UPA/Emergência" + flag encaminhamento
+- [ ] P9 Gestante Não (>25sem) → banner "🚨 Não sentiu bebê mexer — encaminhar imediato"
+- [ ] P5 Gestante Sim (<12sem) → banner "🚨 Sangramento — urgência"
+- [ ] P6 Criança sinais críticos → banner "🚨 Sinal de risco — atendimento imediato"
+- [ ] Anti-pattern PRISMATIC: cada alerta tem instrução concreta (não só score)
 
 ---
 
 ## Dados / API
-
 - [ ] Substituir mockData.ts por dados reais da API (filtrado por equipe_id do ACS logado)
-- [ ] Login por profissional_id (simples, sem OAuth por ora)
-- [ ] Score engine no backend (FastAPI + DuckDB sobre parquets — 97,938 pacientes, 100,503 eventos)
-- [ ] Endpoint `/visitas/semana?profissional_id=X&semana=YYYY-WW` — lista priorizada
-- [ ] Endpoint `/sync` — recebe fila offline e envia ao Vitacare (mock por ora)
-- [ ] 49.9% dos pacientes nunca receberam visita — priorizar no algoritmo de lista
+- [ ] Login por profissional_id (simples, sem OAuth)
+- [ ] Score engine no backend (FastAPI + DuckDB sobre parquets)
+- [ ] Endpoint `/visitas/semana?profissional_id=X&semana=YYYY-WW`
+- [ ] Endpoint `/sync` — recebe fila offline, envia ao Vitacare (mock)
 
 ---
 
 ## Offline / PWA
-
-- [x] Testes de IndexedDB (23 testes — persistência, sync, campos clínicos, fluxo offline→sync)
-- [ ] Background Sync API — sync automático quando volta internet
-- [ ] Conflito de sync — mesmo paciente editado por dois ACS offline
+- [ ] Background Sync API — sync automático ao voltar online
 - [ ] Indicador "dados atualizados em X" vs "cache da semana anterior"
-- [ ] Service Worker: cache de lista da semana toda manhã
-- [ ] Campos de gestante: calcular semana_gestacional offline a partir da DUM armazenada
-
----
-
-## UX / Interface (constraints Camila — MASTER_CONTEXT)
-
-Restrições validadas em campo:
-- ≤3 taps para registrar uma visita simples
-- ACS não quer que o app dite a rota (ela conhece o bairro) — sugerir, nunca impor
-- Offline obrigatório — não pode depender de 4G na comunidade
-
-- [ ] Feedback visual ao salvar (toast de confirmação)
-- [x] Distância do ACS para o paciente na lista (km) — ACS decide a rota
-- [x] Link Google Maps no formulário — abre endereço do paciente (sem sugestão de rota)
-- [ ] Indicador claro de status offline/online (sync bar já existe — refinar)
-- [ ] Notificação "paciente tem consulta amanhã — avisar durante visita"
+- [ ] Service Worker: cache da lista toda manhã
 
 ---
 
 ## Deploy
-
-- [x] Deploy frontend — **https://frontend-psi-black-9cdy0n3cqq.vercel.app** (Vercel, HTTPS, PWA pronto)
+- [x] Deploy frontend — https://frontend-psi-black-9cdy0n3cqq.vercel.app
 - [ ] Deploy backend FastAPI (Fly.io ou Railway)
-- [ ] README do hackathon: demo video, link do app, arquitetura, impacto (1.55M horas/ano)
+- [ ] README hackathon: demo video, link do app, arquitetura, impacto (1.55M horas/ano)
