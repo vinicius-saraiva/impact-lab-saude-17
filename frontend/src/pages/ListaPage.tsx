@@ -62,7 +62,7 @@ export function ListaPage() {
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-blue-700 text-white px-4 pt-10 pb-5">
+      <div className="bg-blue-700 text-white px-4 pt-10 pb-4">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-blue-200 text-sm">Semana atual</p>
@@ -75,7 +75,7 @@ export function ListaPage() {
           </div>
         </div>
         {/* Progress */}
-        <div className="mt-3">
+        <div className="mt-3 mb-4">
           <div className="h-1.5 bg-blue-900 rounded-full overflow-hidden">
             <div
               className="h-full bg-white rounded-full transition-all"
@@ -83,62 +83,61 @@ export function ListaPage() {
             />
           </div>
         </div>
-      </div>
-
-      {/* Seletor de dias */}
-      <div className="bg-white border-b border-slate-200 px-4 py-3">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-          {diasOrdenados.map((dia) => {
-            const { nomeDia, numeroDia, ehHoje } = formatarDia(dia)
-            const qtd = semana.get(dia)?.length ?? 0
-            const visitados = semana.get(dia)?.filter((p) => visitadosSemana.has(p.id)).length ?? 0
-            const ativo = dia === diaAtivo
-            return (
-              <button
-                key={dia}
-                onClick={() => setDiaAtivo(dia)}
-                className={`flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-xl transition-colors min-w-[52px] ${
-                  ativo
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-50 text-slate-600'
-                }`}
-              >
-                <span className={`text-xs font-medium ${ativo ? 'text-blue-200' : 'text-slate-400'}`}>
-                  {nomeDia}
-                </span>
-                <span className={`text-lg font-bold leading-tight ${ehHoje && !ativo ? 'text-blue-600' : ''}`}>
-                  {numeroDia}
-                </span>
-                <span className={`text-xs mt-0.5 ${ativo ? 'text-blue-200' : 'text-slate-400'}`}>
-                  {visitados}/{qtd}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Sync bar */}
-      <SyncBar pendentes={pendentes} status={status} isOnline={isOnline} onSync={sincronizar} />
-
-      {/* Abas Lista / Mapa */}
-      <div className="bg-white border-b border-slate-200 px-4">
-        <div className="flex gap-1">
+        {/* Toggle Lista / Mapa */}
+        <div className="flex bg-blue-800 rounded-xl p-1 gap-1">
           {(['lista', 'mapa'] as const).map((a) => (
             <button
               key={a}
               onClick={() => setAba(a)}
-              className={`py-2.5 px-5 text-sm font-semibold border-b-2 transition-colors ${
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors ${
                 aba === a
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
+                  ? 'bg-white text-blue-700'
+                  : 'text-blue-200'
               }`}
             >
-              {a === 'lista' ? 'Lista' : 'Mapa'}
+              {a === 'lista' ? '☰ Lista' : '🗺 Mapa'}
             </button>
           ))}
         </div>
       </div>
+
+      {/* Seletor de dias — só na aba lista */}
+      {aba === 'lista' && (
+        <div className="bg-white border-b border-slate-200 px-4 py-3">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {diasOrdenados.map((dia) => {
+              const { nomeDia, numeroDia, ehHoje } = formatarDia(dia)
+              const qtd = semana.get(dia)?.length ?? 0
+              const visitados = semana.get(dia)?.filter((p) => visitadosSemana.has(p.id)).length ?? 0
+              const ativo = dia === diaAtivo
+              return (
+                <button
+                  key={dia}
+                  onClick={() => setDiaAtivo(dia)}
+                  className={`flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-xl transition-colors min-w-[52px] ${
+                    ativo
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-50 text-slate-600'
+                  }`}
+                >
+                  <span className={`text-xs font-medium ${ativo ? 'text-blue-200' : 'text-slate-400'}`}>
+                    {nomeDia}
+                  </span>
+                  <span className={`text-lg font-bold leading-tight ${ehHoje && !ativo ? 'text-blue-600' : ''}`}>
+                    {numeroDia}
+                  </span>
+                  <span className={`text-xs mt-0.5 ${ativo ? 'text-blue-200' : 'text-slate-400'}`}>
+                    {visitados}/{qtd}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Sync bar */}
+      <SyncBar pendentes={pendentes} status={status} isOnline={isOnline} onSync={sincronizar} />
 
       {/* Aba Mapa */}
       {aba === 'mapa' && (
