@@ -14,20 +14,20 @@ const CORES: Record<Prioridade, string> = {
 function pinPaciente(prioridade: Prioridade, visitado: boolean) {
   const cor = visitado ? '#94a3b8' : CORES[prioridade]
   return L.divIcon({
-    html: `<div style="width:14px;height:14px;border-radius:50%;background:${cor};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,
-    className: '',
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-    popupAnchor: [0, -10],
+    html: `<div style="width:22px;height:22px;border-radius:50%;background:${cor};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5)"></div>`,
+    className: 'leaflet-div-icon-paciente',
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+    popupAnchor: [0, -14],
   })
 }
 
 const PIN_UNIDADE = L.divIcon({
-  html: `<div style="width:20px;height:20px;border-radius:50%;background:#1d4ed8;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:10px">🏥</div>`,
-  className: '',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-  popupAnchor: [0, -12],
+  html: `<div style="width:28px;height:28px;border-radius:50%;background:#1d4ed8;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:14px">🏥</div>`,
+  className: 'leaflet-div-icon-unidade',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16],
 })
 
 interface Props {
@@ -57,30 +57,37 @@ export function MapaVisitas({ pacientes, visitados }: Props) {
 
     for (const p of pacientes) {
       const visitado = visitados.has(p.id)
-      const popup = document.createElement('div')
-      popup.style.minWidth = '160px'
-      popup.innerHTML = `
-        <div style="font-weight:600;font-size:14px">${p.nome}</div>
-        <div style="font-size:11px;color:#64748b;margin:2px 0">${p.faixaEtaria}a · ${p.distanciaKm.toFixed(1).replace('.', ',')} km</div>
-        <div style="font-size:11px;color:#64748b;margin-bottom:6px;line-height:1.3">${p.motivoPrioridade}</div>
-        ${visitado
-          ? '<span style="font-size:11px;color:#16a34a;font-weight:600">✓ Visitado</span>'
-          : `<button id="ir-${p.id}" style="background:#1d4ed8;color:white;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;width:100%">Registrar visita →</button>`
-        }
+      const htmlPopup = `
+        <div style="min-width:180px;padding:2px 0">
+          <div style="font-weight:700;font-size:14px;margin-bottom:3px">${p.nome}</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:2px">${p.faixaEtaria}a · ${p.distanciaKm.toFixed(1).replace('.', ',')} km da unidade</div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:8px;line-height:1.4">${p.motivoPrioridade}</div>
+          ${visitado
+            ? '<span style="font-size:12px;color:#16a34a;font-weight:700">✓ Visitado</span>'
+            : `<button data-pid="${p.id}" style="background:#1d4ed8;color:white;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;width:100%;touch-action:manipulation">Registrar visita →</button>`
+          }
+        </div>
       `
-      const btn = popup.querySelector<HTMLButtonElement>(`#ir-${p.id}`)
-      if (btn) {
-        L.DomEvent.on(btn, 'click', () => {
-          map.closePopup()
-          navigate(`/visita/${p.id}`)
-        })
-      }
       L.marker([p.lat, p.lng], { icon: pinPaciente(p.prioridade, visitado) })
         .addTo(map)
-        .bindPopup(L.popup().setContent(popup))
+        .bindPopup(htmlPopup, { maxWidth: 240 })
     }
 
+    // Event delegation: captura clique no botão dentro de qualquer popup
+    const container = containerRef.current
+    function onContainerClick(e: MouseEvent | TouchEvent) {
+      const target = (e.target as HTMLElement).closest<HTMLElement>('[data-pid]')
+      if (target?.dataset.pid) {
+        map.closePopup()
+        navigate(`/visita/${target.dataset.pid}`)
+      }
+    }
+    container.addEventListener('click', onContainerClick)
+    container.addEventListener('touchend', onContainerClick)
+
     return () => {
+      container.removeEventListener('click', onContainerClick)
+      container.removeEventListener('touchend', onContainerClick)
       map.remove()
       mapRef.current = null
     }
@@ -92,12 +99,12 @@ export function MapaVisitas({ pacientes, visitados }: Props) {
       <div className="flex gap-3 px-4 py-2 bg-white border-b border-slate-100 text-xs text-slate-500 flex-wrap">
         {(['critica', 'alta', 'media', 'baixa'] as Prioridade[]).map((p) => (
           <span key={p} className="flex items-center gap-1">
-            <span style={{ background: CORES[p] }} className="inline-block w-2.5 h-2.5 rounded-full" />
+            <span style={{ background: CORES[p] }} className="inline-block w-3 h-3 rounded-full" />
             {p === 'critica' ? 'Crítica' : p === 'alta' ? 'Alta' : p === 'media' ? 'Média' : 'Baixa'}
           </span>
         ))}
         <span className="flex items-center gap-1">
-          <span style={{ background: '#94a3b8' }} className="inline-block w-2.5 h-2.5 rounded-full" />
+          <span style={{ background: '#94a3b8' }} className="inline-block w-3 h-3 rounded-full" />
           Visitado
         </span>
       </div>
