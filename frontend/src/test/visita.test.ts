@@ -182,7 +182,7 @@ describe('getCamposFaltando — criança (0-6 anos)', () => {
 
   it('criança com todos os campos preenchidos → zero faltando', () => {
     const form: Partial<RegistroVisita> = {
-      p3c_consultas: 'sim', p4c_vacinacao: 'sim', p5c_alimentacao: 'aleitamento_exclusivo',
+      p3c_consultas: 'sim', p4c_vacinacao: 'sim', p5c_alimentacao: 'lm_exclusivo',
     }
     expect(getCamposFaltando(form, paciente, undefined, true)).toHaveLength(0)
   })
