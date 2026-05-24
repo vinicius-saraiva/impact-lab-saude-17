@@ -13,6 +13,44 @@ import type {
 const PROFISSIONAL_ID = 'acs-demo-001'
 const RACAS: RacaCor[] = ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Outros']
 
+function getCamposFaltando(
+  form: Partial<RegistroVisita>,
+  paciente: import('../types').Paciente,
+  semanaGest: number | undefined,
+  foiAtendido: boolean,
+): string[] {
+  if (!foiAtendido) return []
+  const f: string[] = []
+
+  if (paciente.hipertenso || paciente.diabetico) {
+    if (!form.p1_esqueceu_dose) f.push('Ficha B · P1 – Esqueceu alguma dose?')
+    if (!form.p2_dificuldade_lembrar) f.push('Ficha B · P2 – Frequência de dificuldade')
+    if (!form.p3_desconforto_medicacao) f.push('Ficha B · P3 – Desconforto com medicação?')
+    if (!form.p4_duvida_tratamento) f.push('Ficha B · P4 – Dificuldade com tratamento?')
+    if (!form.p5_mudanca_estilo_vida) f.push('Ficha B · P5 – Mudança de estilo de vida')
+    if (!form.p6_upa_emergencia) f.push('Ficha B · P6 – Foi à UPA/Emergência?')
+    if (paciente.diabetico && !form.p7_pe_diabetico) f.push('Ficha B · P7 – Machucado no pé?')
+    if (paciente.hipertenso && form.pressaoAferidaHoje === undefined) f.push('Ficha B · Aferiu a pressão hoje?')
+    if (form.pressaoAferidaHoje === true && !(form.valorPressao as string)) f.push('Ficha B · Valor da pressão')
+  }
+
+  if (paciente.gestante) {
+    if (!form.p1g_mediu_pressao) f.push('Gestante · P1 – Mediu a pressão?')
+    if (!form.p2g_upa_maternidade) f.push('Gestante · P2 – Foi à UPA/maternidade?')
+    if (!form.p3g_realizou_exames) f.push('Gestante · P3 – Realizou exames?')
+    if ((semanaGest === undefined || semanaGest <= 12) && !form.p5g_sangramento) f.push('Gestante · P5 – Teve sangramento?')
+    if ((semanaGest === undefined || (semanaGest >= 25)) && !form.p9g_bebe_mexeu) f.push('Gestante · P9 – Bebê mexeu?')
+  }
+
+  if (paciente.faixaEtaria === '0-6') {
+    if (!form.p3c_consultas) f.push('Criança · P3 – Consultas em dia?')
+    if (!form.p4c_vacinacao) f.push('Criança · P4 – Vacinação em dia?')
+    if (!form.p5c_alimentacao) f.push('Criança · P5 – Alimentação')
+  }
+
+  return f
+}
+
 export function VisitaPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -82,6 +120,7 @@ export function VisitaPage() {
   const semanaGest = form.dum
     ? Math.floor((Date.now() - new Date((form.dum as string) + 'T12:00:00').getTime()) / (7 * 24 * 3600 * 1000))
     : undefined
+  const camposFaltando = getCamposFaltando(form, paciente, semanaGest, foiAtendido ?? false)
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -176,9 +215,25 @@ export function VisitaPage() {
 
       {/* Botão salvar */}
       {estavaCasa !== null && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 max-w-md mx-auto">
-          <button onClick={handleSalvar} disabled={salvando}
-            className="w-full bg-blue-600 active:bg-blue-700 text-white font-semibold py-4 rounded-2xl text-base disabled:opacity-60 transition-colors">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 max-w-md mx-auto space-y-3">
+          {camposFaltando.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+              <p className="text-xs font-semibold text-amber-700 mb-1">Preencha antes de salvar:</p>
+              <ul className="space-y-0.5">
+                {camposFaltando.slice(0, 4).map((campo) => (
+                  <li key={campo} className="text-xs text-amber-600">• {campo}</li>
+                ))}
+                {camposFaltando.length > 4 && (
+                  <li className="text-xs text-amber-500">• +{camposFaltando.length - 4} outros campos</li>
+                )}
+              </ul>
+            </div>
+          )}
+          <button
+            onClick={handleSalvar}
+            disabled={salvando || camposFaltando.length > 0}
+            className="w-full bg-blue-600 active:bg-blue-700 text-white font-semibold py-4 rounded-2xl text-base disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
             {salvando ? 'Salvando...' : foiAtendido ? 'Salvar visita' : 'Registrar ocorrência'}
           </button>
         </div>
