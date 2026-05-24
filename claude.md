@@ -1,48 +1,30 @@
-you're going to help us in claude impact lab rio - a 1 day hackathon in partnership with Secretaria Municipal de Saúde.
+# Projeto Hackathon — Saúde Pública RJ (Claude Impact Lab 24/05/2026)
 
-I'll add to [notes.md](http://notes.md) what I gather from the initial presentation.
+## Time
+- Advogado-founder (PM/pitch)
+- Médica de família (domain expert, validação clínica)
+- 3 técnicos IA não-devs (vibe coders)
 
-basically we need to:
+## Stack
+- Python 3.11+, Streamlit (UI principal de dados)
+- Lovable.dev (landing/marketing) via MCP em https://mcp.lovable.dev
+- v0/Vercel para componentes React isolados se necessário
+- Pandas + Plotly + Folium para visualização e mapas
+- Dados: DataSUS (TabNet/SIM/SIH via pysus), data.rio (CSV/GeoJSON), InfoDengue (https://info.dengue.mat.br/api/alertcity)
 
-- define a well-scoped, real problem
-- draft a solution
-- implement the solution that can be really used in production, tomorrow
-- prepare the final presentation
+## Convenções
+- Português brasileiro em UI, código em inglês
+- Variáveis de ambiente em .env (nunca commitar)
+- LGPD: nenhum dado pessoal identificável é aceito; agregue por município/semana
+- Cite a fonte oficial em todo gráfico (logo/rodapé)
 
-we have a team of 4:
+## Comandos
+- `streamlit run app.py --server.port 8501`
+- `python -m pytest tests/ -v` (se houver tempo pra testes)
 
-- laura - doctor at prefeitura do rio, works in primary care at a family clinic in Rocinha
-- daniel - builder, vibe coder, lawyer
-- vinicius - builder, vibe coder, product manager
-- rafael - builder, vibe coder, product designer
-
-deadlines:
-
-- 16:15 (Brasilia): deadline to publish the solution on github
-
-criterios de avaliacao
-
-- 40% impacto real - a prefeitura usaria isso hoje para gerar impacto real?
-- 20% produto - qualidade do design, usabilidade, experiencia de uso
-- 20% engenharia - qualidade tecnica da solucao e sua escalabilidade para producao
-- 10% ideia - quão inovadora é a ideia
-- 10% apresentacao - vao escolher 3 grupos de cada problema para apresentar (são 20 grupos)
-
-apresentacao final
-
-- 6 finalistas
-- 6 minutos para apresentar
-
-premio para vencedor
-
-- ingressos rio web summit
-- USD 500 de credito para Claude
-
-Dicas:
-
-- explorar muito o problema antes de partir pra solucao
-- cuidado com modelos caros - pra nao acabar os creditos
-- dados reais vem com ruido
-- pensem fora da caixa
-- submetam pensando na avaliacao - github limpo com readme bem organizado, gravacao de tela mostrando o produto, publicar o link
-
+## Regras críticas
+- **NÃO** instalar mais MCPs durante o evento. Stack fechada.
+- Sempre rodar Plan Mode (Shift+Tab+Tab) antes de qualquer mudança que toque >2 arquivos.
+- Use Context7 MCP para qualquer dúvida de API de Streamlit/Plotly/Folium.
+- Use a skill pptx para o deck final às 17h.
+- /clear entre tarefas não relacionadas (UI vs ETL vs pitch).
