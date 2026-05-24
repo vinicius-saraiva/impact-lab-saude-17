@@ -138,8 +138,9 @@ const { data } = await supabase.rpc('dashboard_equipe', {
 
 ### 2.3 `paciente_detalhe(p_paciente_id, p_ref_date)`
 
-Retorna o paciente com score completo + últimos 10 eventos e 10 visitas.
-Use na tela de detalhe.
+Retorna o paciente com score, **ficha estendida** (overrides do form + sinais
+clínicos extraídos da última captura) e histórico de até 10 visitas, eventos
+e capturas. Use na tela de detalhe e na tela de visita.
 
 ```ts
 const { data } = await supabase.rpc('paciente_detalhe', {
@@ -150,14 +151,59 @@ const { data } = await supabase.rpc('paciente_detalhe', {
 // data:
 // {
 //   "paciente": { /* mesmas colunas de priorizacao_pacientes */ },
-//   "visitas_recentes": [
-//     { "registrados_em": "2025-10-01", "profissional_id": "..." }, ...
-//   ],
-//   "eventos_recentes": [
-//     { "tipo": "urgencia-emergencia-ou-internacao", "data_referencia": "2025-12-18" }, ...
-//   ]
+//   "ficha_extendida": {
+//     /* base do paciente (com overrides do form aplicados) +
+//        metadados da última captura + sinais extraídos do payload */
+//     "raca_cor": "Parda",                         // pode vir do form se atualizou
+//     "raca_cor_base": "Branca",                   // valor original no cadastro
+//     "ultima_captura_em": "2025-12-30T14:22:00Z",
+//     "ultima_captura_profissional_id": "...",
+//     "ultima_captura_blocos": ["hipertenso"],
+//     "ultima_captura_payload": { /* form completo */ },
+//
+//     // sinais agudos extraídos do form (entram no motor):
+//     "form_upa_emergencia": false,
+//     "form_gestante_upa": false,
+//     "form_gestante_sangramento": false,
+//     "form_gestante_bebe_nao_mexeu": false,
+//
+//     // metadados expostos pra ficha (NÃO entram no motor):
+//     "form_risco_gestacional_alto": false,
+//     "form_adesao_medicacao": "irregular",
+//     "form_adesao_ruim": true,
+//     "form_pa_sistolica": 150,
+//     "form_pa_diastolica": 95,
+//     "form_recusou_visita": false,
+//     "form_precisa_encaminhamento": false,
+//     "form_observacoes": "..."
+//   },
+//   "visitas_recentes":  [ /* até 10 */ ],
+//   "eventos_recentes":  [ /* até 10 */ ],
+//   "capturas_recentes": [ /* até 10 — id, capturado_em, perfil_blocos, payload */ ]
 // }
 ```
+
+#### Sinais do form que entram no motor PRIO-ACS
+
+Os 4 sinais agudos abaixo, quando capturados no app nos últimos 60 dias,
+**forçam `evento_recente_60d = true`** (somam o mesmo +15 em `score_care_gap`
+que uma urgência registrada no Vitacare):
+
+| Campo do form | Significa |
+|---|---|
+| `p6_upa_emergencia = 'sim'` | paciente reportou ida à UPA/emergência |
+| `p2g_upa_maternidade = 'sim'` | gestante foi à UPA/maternidade |
+| `p5g_sangramento = 'sim'` | gestante com sangramento |
+| `p9g_bebe_mexeu = 'nao'` | gestante: bebê não mexeu |
+
+E o `capturado_em` da última captura **conta como `ultima_visita`** pro
+cálculo de gap — `ultima_visita = MAX(visitas.registrados_em, visitas_capturadas.capturado_em)`.
+Resultado: ACS termina visita no app, paciente sai da fila imediatamente
+(sem esperar sync com Vitacare).
+
+Os demais sinais (`form_adesao_ruim`, `form_pa_sistolica`, `form_risco_gestacional_alto`)
+ficam **na ficha estendida pra exibição**, mas não entram no score do MVP —
+roadmap pós-piloto.
 
 ---
 

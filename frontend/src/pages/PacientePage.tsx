@@ -1,17 +1,26 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { CondicaoBadge } from '../components/CondicaoBadge'
 import { PrioridadeBadge } from '../components/PrioridadeBadge'
-import { MOCK_PACIENTES, googleMapsUrl } from '../mockData'
+import { googleMapsUrl } from '../lib/supabaseAdapter'
+import { usePacienteDetalhe } from '../hooks/usePacienteDetalhe'
 
 export function PacientePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const p = MOCK_PACIENTES.find((x) => x.id === id)
+  const { paciente: p, loading, error } = usePacienteDetalhe(id)
 
-  if (!p) {
+  if (loading) {
+    return (
+      <div className="p-8 text-center text-slate-400 text-sm">
+        Carregando paciente…
+      </div>
+    )
+  }
+
+  if (error || !p) {
     return (
       <div className="p-8 text-center text-slate-500">
-        Paciente não encontrado.
+        {error ? `Erro: ${error.message}` : 'Paciente não encontrado.'}
         <button onClick={() => navigate('/')} className="block mx-auto mt-4 text-blue-600 underline">
           Voltar
         </button>

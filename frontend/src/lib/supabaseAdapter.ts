@@ -148,6 +148,26 @@ export async function fetchEquipeGeo(equipeId = DEMO_EQUIPE_ID): Promise<GeoEqui
   return { lat: data.endereco_latitude, lng: data.endereco_longitude }
 }
 
+export function googleMapsUrl(p: Pick<Paciente, 'lat' | 'lng'>): string {
+  return `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`
+}
+
+export async function fetchPacienteDetalhe(
+  pacienteId: string,
+  refDate = REF_DATE,
+): Promise<Paciente | null> {
+  const { data, error } = await supabase.rpc('paciente_detalhe', {
+    p_paciente_id: pacienteId,
+    p_ref_date: refDate,
+  })
+  if (error) throw error
+  if (!data || !data.paciente) return null
+
+  const equipeId = data.paciente.equipe_id as string
+  const geo = await fetchEquipeGeo(equipeId)
+  return mapRow(data.paciente as RpcPaciente, geo.lat, geo.lng)
+}
+
 export async function fetchPacientesPriorizados(
   equipeId = DEMO_EQUIPE_ID,
   refDate = REF_DATE,
