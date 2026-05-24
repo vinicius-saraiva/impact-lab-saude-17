@@ -1,14 +1,23 @@
-# Endpoints Supabase — para o frontend
+# Integração Supabase — guia do frontend
 
-Tudo que o app ACS consome do Supabase. Três famílias:
+Tudo que o app ACS consome do Supabase. Quatro famílias:
 
-1. **RPC functions** (cálculos do motor PRIO-ACS) — `supabase.rpc(...)`
+1. **RPC functions** (motor PRIO-ACS, calculado server-side) — `supabase.rpc(...)`
 2. **Tabelas diretas** (CRUD simples) — `supabase.from(...).select/insert`
-3. **Auth** (mock no MVP, real no piloto)
+3. **Realtime** (push via WebSocket quando dados mudam) — `supabase.channel(...)`
+4. **Auth** (mock no MVP, real no piloto)
 
-> URL: `https://gyutcqmrbbtftrowcyhv.supabase.co`
-> Region: `sa-east-1` (São Paulo)
-> Anon key: pega no painel **Project Settings → API → anon public**
+## Projeto
+
+| Campo | Valor |
+|---|---|
+| URL | `https://gyutcqmrbbtftrowcyhv.supabase.co` |
+| Região | South America (São Paulo) — `aws-1-sa-east-1` |
+| Postgres | 17.6 |
+| Project ref | `gyutcqmrbbtftrowcyhv` |
+| Anon key | pega no painel **Project Settings → API → anon public** |
+
+A anon key é pública (vai no client). `service_role` **nunca** vai no front.
 
 ---
 
@@ -42,9 +51,87 @@ npx supabase gen types typescript --project-id gyutcqmrbbtftrowcyhv \
   > src/lib/database.types.ts
 ```
 
+(rode quando o schema mudar — precisa de `supabase login`).
+
 ---
 
-## 2. RPC functions — motor PRIO-ACS
+## 2. Schema do banco
+
+```mermaid
+erDiagram
+    equipes ||--o{ pacientes : "responsável por"
+    pacientes ||--o{ visitas : "recebe"
+    pacientes ||--o{ eventos : "tem"
+    pacientes ||--o{ visitas_capturadas : "gera"
+
+    equipes {
+        text equipe_id PK
+        float endereco_latitude
+        float endereco_longitude
+    }
+    pacientes {
+        text paciente_id PK
+        text equipe_id FK
+        text unidade_id
+        text faixa_etaria
+        text sexo
+        text raca_cor
+        bool situacao_vulnerabilidade
+        float endereco_latitude
+        float endereco_longitude
+        bool hipertenso
+        bool diabetico
+        bool gestacao
+    }
+    eventos {
+        bigserial id PK
+        text paciente_id FK
+        text tipo
+        date data_referencia
+    }
+    visitas {
+        bigserial id PK
+        text profissional_id
+        date registrados_em
+        int ordem_visita_dia
+        text paciente_id FK
+    }
+    visitas_capturadas {
+        uuid id PK
+        text paciente_id FK
+        text profissional_id
+        timestamptz capturado_em
+        text[] perfil_blocos
+        jsonb payload
+        bool sincronizado_vitacare
+        timestamptz sincronizado_em
+    }
+```
+
+### Notas por tabela
+
+- **`equipes`** — 49 linhas. `endereco_latitude/longitude` é a sede da unidade
+  de saúde (ponto de partida do ACS).
+- **`pacientes`** — 97.938 linhas. Flags clínicas + demográficas + endereço
+  com ruído de até 100 m (anonimização do dataset).
+- **`eventos`** — 100.503 linhas. `tipo` ∈ `{agendamento,
+  urgencia-emergencia-ou-internacao}`. Datas estão *date-shifted* mas com a
+  sequência preservada.
+- **`visitas`** — 159.599 linhas. Histórico oficial de visitas dos ACS em
+  2025 (vem do Vitacare).
+- **`visitas_capturadas`** — **vazia inicialmente**. É onde o app grava
+  cada visita preenchida em campo. Schema em §4.3.
+
+Índices criados em: `pacientes(equipe_id)`, `pacientes(unidade_id)`,
+`eventos(paciente_id, data_referencia DESC)`, `eventos(tipo)`,
+`visitas(paciente_id, registrados_em DESC)`,
+`visitas(profissional_id, registrados_em DESC)`,
+`visitas_capturadas(paciente_id, capturado_em DESC)`,
+`visitas_capturadas(profissional_id, capturado_em DESC)`.
+
+---
+
+## 3. RPC functions — motor PRIO-ACS
 
 Todas estáveis (sem side-effects), seguras de chamar várias vezes. O score
 0–100 segue a fórmula oficial do PRIO-ACS (`MASTER_CONTEXT.md` §6.4):
@@ -58,7 +145,7 @@ tier:  alto (≥61, "Semanal")
        habitual (0–30, "Mensal")
 ```
 
-### 2.1 `priorizacao_pacientes(p_equipe_id, p_ref_date)`
+### 3.1 `priorizacao_pacientes(p_equipe_id, p_ref_date)`
 
 Retorna **todos os pacientes da equipe** com score e features. Frontend
 ordena/limita por necessidade da tela.
@@ -106,7 +193,7 @@ de result-set por request.
 
 ---
 
-### 2.2 `dashboard_equipe(p_equipe_id, p_ref_date)`
+### 3.2 `dashboard_equipe(p_equipe_id, p_ref_date)`
 
 Retorna um JSON único com indicadores agregados para a tela do gestor.
 
@@ -136,7 +223,7 @@ const { data } = await supabase.rpc('dashboard_equipe', {
 
 ---
 
-### 2.3 `paciente_detalhe(p_paciente_id, p_ref_date)`
+### 3.3 `paciente_detalhe(p_paciente_id, p_ref_date)`
 
 Retorna o paciente com score completo + últimos 10 eventos e 10 visitas.
 Use na tela de detalhe.
@@ -161,9 +248,9 @@ const { data } = await supabase.rpc('paciente_detalhe', {
 
 ---
 
-## 3. Tabelas diretas
+## 4. Tabelas diretas
 
-### 3.1 Listar equipes (para seleção do ACS no mock de login)
+### 4.1 Listar equipes (para seleção do ACS no mock de login)
 
 ```ts
 const { data: equipes } = await supabase
@@ -171,7 +258,7 @@ const { data: equipes } = await supabase
   .select('equipe_id, endereco_latitude, endereco_longitude')
 ```
 
-### 3.2 Listar profissionais (para "selecionar ACS" na demo)
+### 4.2 Listar profissionais (para "selecionar ACS" na demo)
 
 > O dataset não tem nome de profissional. Use o id, encurte para display:
 > `Profissional ${id.slice(-5)}`.
@@ -188,7 +275,7 @@ const acsIds = [...new Set(data?.map(v => v.profissional_id))]
 
 (Se ficar lento, dá pra criar uma view `vw_profissionais_distintos` depois.)
 
-### 3.3 Registrar visita preenchida em campo
+### 4.3 Registrar visita preenchida em campo
 
 Esta é a tabela onde o `useSync` salva os forms preenchidos:
 
@@ -236,7 +323,7 @@ batched é suportado, é só passar um array.
 
 ---
 
-## 4. Realtime — motor reage à medida que dados entram
+## 5. Realtime — motor reage à medida que dados entram
 
 As 3 RPCs já são **real-time on read**: cada chamada recomputa o score
 contra o estado atual das tabelas. Não tem JSON estático, não tem batch.
@@ -305,7 +392,7 @@ recebem push e refazem a lista. Ranking se reordena sozinho.
 desnormalizada em `visitas_capturadas` se virar gargalo.)
 
 
-## 5. Auth — MVP
+## 6. Auth e segurança — MVP
 
 Sem RLS ligado no MVP. Anon key tem leitura/escrita total nas 5 tabelas e
 permissão de `EXECUTE` nas 4 functions.
@@ -322,9 +409,19 @@ const { data: equipeId } = await supabase.rpc('equipe_do_profissional', {
 // usa esse equipeId em priorizacao_pacientes / dashboard_equipe
 ```
 
+**Segurança no MVP (defensável pro juiz):** dataset é o oficial anonimizado
+da Prefeitura (k-anon ≥ 5, date-shifted, ruído geográfico 100 m). RLS está
+desligado pra simplificar a demo.
+
+**Antes de qualquer paciente real (roadmap):**
+- Ligar **Row Level Security** com policies que comparam
+  `auth.jwt() -> 'equipe_id'` com a coluna `equipe_id`.
+- Trocar dropdown de ACS por **ConecteSUS Profissional** (OIDC).
+- Audit log com `pg_audit` ou trigger em todas as leituras individuais.
+
 ---
 
-## 6. Onde está cada função no código
+## 7. Onde está cada função no código
 
 | O que você vai fazer | API |
 |---|---|
@@ -339,7 +436,7 @@ const { data: equipeId } = await supabase.rpc('equipe_do_profissional', {
 
 ---
 
-## 7. Latências esperadas (medidas em sa-east-1)
+## 8. Latências esperadas (medidas em sa-east-1)
 
 | Call | Tempo |
 |---|---|
@@ -353,7 +450,29 @@ Se precisarmos derrubar mais, dá pra adicionar materialized view ou
 
 ---
 
-## 8. O que ainda não fizemos (roadmap pós-MVP)
+## 9. Recarregar / resetar dados
+
+O script de carga vive em `scripts/setup_supabase.py` (drop+recreate das 5
+tabelas + reload dos 4 parquets). **Não rode em produção** — só em ambiente
+de dev/demo.
+
+```bash
+pip install 'psycopg[binary]' duckdb pandas
+export SUPABASE_DB_URL='postgresql://postgres.gyutcqmrbbtftrowcyhv:<senha>@aws-1-sa-east-1.pooler.supabase.com:5432/postgres'
+python scripts/setup_supabase.py
+```
+
+As migrations das funções RPC e Realtime estão em `db/migrations/`:
+
+```bash
+# Aplicar tudo
+psql "$SUPABASE_DB_URL" -f db/migrations/001_priorization.sql
+psql "$SUPABASE_DB_URL" -f db/migrations/002_realtime.sql
+```
+
+---
+
+## 10. O que ainda não fizemos (roadmap pós-MVP)
 
 - RLS por `equipe_id` no JWT (substitui filtro server-side por permissão de banco)
 - View `vw_profissionais_distintos` (atalho do §3.2)
