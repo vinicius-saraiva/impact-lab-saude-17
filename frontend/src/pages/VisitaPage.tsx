@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CondicaoBadge } from '../components/CondicaoBadge'
 import { PrioridadeBadge } from '../components/PrioridadeBadge'
-import { salvarVisita } from '../db'
-import { MOCK_PACIENTES, googleMapsUrl } from '../mockData'
+import { salvarVisita, getVisitaPacienteNaSemana } from '../db'
+import { MOCK_PACIENTES, googleMapsUrl, getPacientesSemana } from '../mockData'
 import type {
   RegistroVisita, RacaCor,
   RespostaSN, Frequencia5pt, MudancaEstiloVida,
@@ -73,6 +73,17 @@ export function VisitaPage() {
   const [form, setForm] = useState<Partial<RegistroVisita>>(draft?.form ?? {})
   const [mostrarEncaminhamento, setMostrarEncaminhamento] = useState(false)
   const [mostrarModalSaida, setMostrarModalSaida] = useState(false)
+  const [visitaExistente, setVisitaExistente] = useState<RegistroVisita | null>(null)
+
+  useEffect(() => {
+    if (!id) return
+    const semana = getPacientesSemana()
+    const dias = Array.from(semana.keys()).sort()
+    if (dias.length === 0) return
+    getVisitaPacienteNaSemana(id, dias[0], dias[dias.length - 1]).then((v) => {
+      if (v) setVisitaExistente(v)
+    })
+  }, [id])
 
   if (!paciente) {
     return (
@@ -154,6 +165,10 @@ export function VisitaPage() {
     ? Math.floor((Date.now() - new Date((form.dum as string) + 'T12:00:00').getTime()) / (7 * 24 * 3600 * 1000))
     : undefined
   const camposFaltando = getCamposFaltando(form, paciente, semanaGest, foiAtendido ?? false)
+
+  if (visitaExistente) {
+    return <VisitaRegistradaView paciente={paciente} visita={visitaExistente} onVoltar={() => navigate(-1)} />
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -683,6 +698,133 @@ function OpcaoBtn({ label, ativo, onClick, fullWidth, small }: {
       }`}>
       {label}
     </button>
+  )
+}
+
+// ─── View somente-leitura de visita já registrada ──────────────────────────────
+
+const LABEL_SN: Record<string, string> = {
+  sim: 'Sim', nao: 'Não', nao_sei: 'Não sei',
+}
+const LABEL_FREQ: Record<string, string> = {
+  nunca: 'Nunca', raramente: 'Raramente', as_vezes: 'Às vezes',
+  frequentemente: 'Frequentemente', sempre: 'Sempre',
+}
+
+function CampoLeitura({ label, valor }: { label: string; valor: string | undefined | null | boolean | number }) {
+  if (valor === undefined || valor === null || valor === '') return null
+  let texto: string
+  if (typeof valor === 'boolean') texto = valor ? 'Sim' : 'Não'
+  else texto = LABEL_SN[String(valor)] ?? LABEL_FREQ[String(valor)] ?? String(valor)
+  return (
+    <div className="flex justify-between items-start gap-4 py-1.5 border-b border-slate-100 last:border-0">
+      <span className="text-sm text-slate-500 flex-1">{label}</span>
+      <span className="text-sm font-medium text-slate-800 text-right">{texto}</span>
+    </div>
+  )
+}
+
+function VisitaRegistradaView({
+  paciente,
+  visita,
+  onVoltar,
+}: {
+  paciente: import('../types').Paciente
+  visita: RegistroVisita
+  onVoltar: () => void
+}) {
+  const dataFmt = new Date(visita.dataVisita + 'T12:00:00').toLocaleDateString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long',
+  })
+
+  const presenca = visita.estavaCasa === false
+    ? 'Não estava em casa'
+    : visita.recusouVisita
+      ? 'Recusou a visita'
+      : 'Atendido(a)'
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Header */}
+      <div className="bg-green-700 text-white px-4 pt-10 pb-5">
+        <button onClick={onVoltar} className="flex items-center gap-1 text-green-200 text-sm mb-3">
+          ‹ Voltar
+        </button>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold">{paciente.nome}</h1>
+            <p className="text-green-200 text-sm mt-0.5">{paciente.sexo} · {paciente.faixaEtaria} anos</p>
+          </div>
+          <span className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0">
+            ✓ Visitado
+          </span>
+        </div>
+        <div className="mt-3 bg-green-800/50 rounded-xl px-3 py-2">
+          <p className="text-green-100 text-xs font-medium">{dataFmt} · {visita.hora}</p>
+          <p className="text-white text-sm font-semibold mt-0.5">{presenca}</p>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {visita.precisaEncaminhamento && (
+          <div className="bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
+            <p className="text-orange-700 text-sm font-semibold">⚠️ Encaminhamento indicado</p>
+            <p className="text-orange-600 text-xs mt-0.5">Paciente necessita encaminhamento para UBS/especialista.</p>
+          </div>
+        )}
+
+        {/* Ficha B Crônico */}
+        {(paciente.hipertenso || paciente.diabetico) && visita.estavaCasa && !visita.recusouVisita && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-4">
+            <h3 className="font-semibold text-slate-700 mb-3">
+              {paciente.hipertenso && paciente.diabetico ? '❤️ Hipertensão + Diabetes' : paciente.diabetico ? '💉 Diabetes' : '❤️ Hipertensão'}
+            </h3>
+            <CampoLeitura label="P1 – Esqueceu alguma dose?" valor={visita.p1_esqueceu_dose} />
+            <CampoLeitura label="P2 – Frequência de dificuldade" valor={visita.p2_dificuldade_lembrar} />
+            <CampoLeitura label="P3 – Desconforto com medicação?" valor={visita.p3_desconforto_medicacao} />
+            <CampoLeitura label="P4 – Dificuldade com tratamento?" valor={visita.p4_duvida_tratamento} />
+            <CampoLeitura label="P5 – Mudança de estilo de vida" valor={visita.p5_mudanca_estilo_vida} />
+            <CampoLeitura label="P6 – Foi à UPA/Emergência?" valor={visita.p6_upa_emergencia} />
+            {paciente.diabetico && <CampoLeitura label="P7 – Machucado no pé?" valor={visita.p7_pe_diabetico} />}
+            <CampoLeitura label="Aferiu pressão hoje?" valor={visita.pressaoAferidaHoje} />
+            {visita.pressaoAferidaHoje && <CampoLeitura label="Valor da pressão" valor={visita.valorPressao} />}
+          </div>
+        )}
+
+        {/* Ficha B Gestante */}
+        {paciente.gestante && visita.estavaCasa && !visita.recusouVisita && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-4">
+            <h3 className="font-semibold text-slate-700 mb-3">🤰 Gestante</h3>
+            <CampoLeitura label="Semana gestacional" valor={visita.semanaGestacional} />
+            <CampoLeitura label="P1 – Mediu a pressão?" valor={visita.p1g_mediu_pressao} />
+            <CampoLeitura label="P2 – Foi à UPA/maternidade?" valor={visita.p2g_upa_maternidade} />
+            <CampoLeitura label="P3 – Realizou exames?" valor={visita.p3g_realizou_exames} />
+            <CampoLeitura label="P5 – Teve sangramento?" valor={visita.p5g_sangramento} />
+            <CampoLeitura label="P9 – Bebê mexeu?" valor={visita.p9g_bebe_mexeu} />
+          </div>
+        )}
+
+        {/* Ficha C Criança */}
+        {paciente.faixaEtaria === '0-6' && visita.estavaCasa && !visita.recusouVisita && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-4">
+            <h3 className="font-semibold text-slate-700 mb-3">👶 Criança</h3>
+            <CampoLeitura label="P3 – Consultas em dia?" valor={visita.p3c_consultas} />
+            <CampoLeitura label="P4 – Vacinação em dia?" valor={visita.p4c_vacinacao} />
+            <CampoLeitura label="P5 – Alimentação" valor={visita.p5c_alimentacao} />
+          </div>
+        )}
+
+        {/* Observações */}
+        {visita.observacoesGerais && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-4">
+            <h3 className="font-semibold text-slate-700 mb-2">📝 Observações</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">{visita.observacoesGerais}</p>
+          </div>
+        )}
+
+        <div className="h-4" />
+      </div>
+    </div>
   )
 }
 

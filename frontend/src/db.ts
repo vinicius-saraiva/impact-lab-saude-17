@@ -40,3 +40,16 @@ export async function getVisitasHoje(profissionalId: string): Promise<RegistroVi
     .and((v) => v.dataVisita === hoje)
     .toArray()
 }
+
+export async function getVisitaPacienteNaSemana(
+  pacienteId: string,
+  inicio: string,
+  fim: string,
+): Promise<RegistroVisita | undefined> {
+  const visitas = await db.visitas
+    .where('pacienteId')
+    .equals(pacienteId)
+    .and((v) => v.dataVisita >= inicio && v.dataVisita <= fim)
+    .toArray()
+  return visitas[0]
+}

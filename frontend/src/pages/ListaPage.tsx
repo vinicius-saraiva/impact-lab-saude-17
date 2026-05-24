@@ -171,15 +171,42 @@ export function ListaPage() {
             </div>
           )}
 
-          {todosPacientes.map((paciente, i) => (
-            <PacienteCard
-              key={paciente.id}
-              paciente={paciente}
-              ordem={i + 1}
-              visitado={visitadosSemana.has(paciente.id)}
-              onClick={() => navigate(`/paciente/${paciente.id}`)}
-            />
-          ))}
+          {/* Pendentes */}
+          {todosPacientes
+            .filter((p) => !visitadosSemana.has(p.id))
+            .map((paciente, i) => (
+              <PacienteCard
+                key={paciente.id}
+                paciente={paciente}
+                ordem={i + 1}
+                visitado={false}
+                onClick={() => navigate(`/paciente/${paciente.id}`)}
+              />
+            ))}
+
+          {/* Visitados — ao fundo, em verde */}
+          {visitadosTotal > 0 && (
+            <>
+              <div className="flex items-center gap-2 pt-2">
+                <div className="flex-1 h-px bg-green-200" />
+                <span className="text-xs font-semibold text-green-600 uppercase tracking-wide">
+                  {visitadosTotal} visitado{visitadosTotal > 1 ? 's' : ''}
+                </span>
+                <div className="flex-1 h-px bg-green-200" />
+              </div>
+              {todosPacientes
+                .filter((p) => visitadosSemana.has(p.id))
+                .map((paciente) => (
+                  <PacienteCard
+                    key={paciente.id}
+                    paciente={paciente}
+                    ordem={0}
+                    visitado={true}
+                    onClick={() => navigate(`/visita/${paciente.id}`)}
+                  />
+                ))}
+            </>
+          )}
         </div>
       )}
     </div>
@@ -194,6 +221,33 @@ interface CardProps {
 }
 
 function PacienteCard({ paciente, ordem, visitado, onClick }: CardProps) {
+  if (visitado) {
+    return (
+      <button
+        onClick={onClick}
+        className="w-full text-left bg-green-50 rounded-2xl border border-green-200 p-4 active:scale-[0.98] transition-transform"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+            ✓
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-base text-green-800">{paciente.nome}</span>
+              <span className="text-xs text-green-600 font-medium bg-green-100 px-2 py-0.5 rounded-full">
+                Visitado
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {paciente.condicoes.map((c) => <CondicaoBadge key={c} condicao={c} />)}
+            </div>
+            <p className="text-xs text-green-600 mt-1.5">Ver visita registrada →</p>
+          </div>
+        </div>
+      </button>
+    )
+  }
+
   return (
     <button
       onClick={onClick}
@@ -202,29 +256,20 @@ function PacienteCard({ paciente, ordem, visitado, onClick }: CardProps) {
       <div className="flex items-start gap-3">
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-            visitado
-              ? 'bg-green-100 text-green-600'
-              : paciente.prioridade === 'critica'
-                ? 'bg-red-100 text-red-600'
-                : paciente.prioridade === 'alta'
-                  ? 'bg-orange-100 text-orange-600'
-                  : 'bg-slate-100 text-slate-500'
+            paciente.prioridade === 'critica'
+              ? 'bg-red-100 text-red-600'
+              : paciente.prioridade === 'alta'
+                ? 'bg-orange-100 text-orange-600'
+                : 'bg-slate-100 text-slate-500'
           }`}
         >
-          {visitado ? '✓' : ordem}
+          {ordem}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`font-semibold text-base ${visitado ? 'text-slate-400' : 'text-slate-800'}`}>
-              {paciente.nome}
-            </span>
-            {!visitado && <PrioridadeBadge prioridade={paciente.prioridade} />}
-            {visitado && (
-              <span className="text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">
-                Visitado
-              </span>
-            )}
+            <span className="font-semibold text-base text-slate-800">{paciente.nome}</span>
+            <PrioridadeBadge prioridade={paciente.prioridade} />
           </div>
 
           <div className="flex flex-wrap gap-1 mt-1.5">
@@ -233,9 +278,7 @@ function PacienteCard({ paciente, ordem, visitado, onClick }: CardProps) {
             ))}
           </div>
 
-          {!visitado && (
-            <p className="text-xs text-slate-500 mt-1.5 leading-snug">{paciente.motivoPrioridade}</p>
-          )}
+          <p className="text-xs text-slate-500 mt-1.5 leading-snug">{paciente.motivoPrioridade}</p>
 
           <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
             <span>📍 {paciente.distanciaKm.toFixed(1).replace('.', ',')} km</span>
