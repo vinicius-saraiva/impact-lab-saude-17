@@ -229,16 +229,21 @@ EXEMPLO: "Oi Maria, soube que você passou na UPA semana passada — vim ver com
 
 ### 7.1 Engenharia (gera os 2 JSON)
 
+✅ **Script já implementado:** [scripts/gerar_lista_do_dia.py](scripts/gerar_lista_do_dia.py)
+✅ **Outputs de exemplo já versionados:** [out/lista_do_dia.json](out/lista_do_dia.json) + [out/dashboard_supervisor.json](out/dashboard_supervisor.json)
+
 ```bash
-# Setup
-pip install pandas duckdb anthropic fastapi uvicorn
+# Setup (pandas + duckdb já em requirements.txt)
+pip install -r requirements.txt
 
-# Profilagem rápida (já feita, refs em MASTER_CONTEXT §5)
-python -c "import duckdb; print(duckdb.sql('SELECT * FROM read_parquet(\"data/raw/pacientes_anonimizados.parquet\") LIMIT 5'))"
+# Gerar com profissional demo automático (variedade clínica)
+python scripts/gerar_lista_do_dia.py --demo
 
-# Gerar lista_do_dia.json (precisa escrever)
-python scripts/gerar_lista_do_dia.py --profissional ACS_007 --data 2026-05-24 --out out/lista_do_dia.json
+# Ou com profissional específico
+python scripts/gerar_lista_do_dia.py --profissional <hash_id> --data 2025-12-31 --top-n 8
 ```
+
+**Distribuição PRIO-ACS no dataset real:** alto 0,4% (350) · médio 17,9% (17.550) · habitual 81,7% (80.038). Top 8 do demo: 7 crônicos+vulneráveis + 1 gestante com urgência recente (combo prioridade zero).
 
 ### 7.2 Front (Streamlit caminho rápido)
 
