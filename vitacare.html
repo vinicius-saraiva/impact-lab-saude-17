@@ -1,0 +1,1124 @@
+<html><head>
+    <title>VITACARE e-Health Solution</title>
+
+<link rel="stylesheet" href="/css/third-party/normalize.css">
+<link rel="stylesheet" href="/css/third-party/ibox.css">
+<link rel="stylesheet" href="/css/xsite.css">
+<link rel="stylesheet" href="/css/vtcstyles.css">
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script type="text/javascript" src="/js/third-party/prototype.js"></script>
+<script type="text/javascript" src="/js/third-party/jquery.js"></script>
+<script type="text/javascript" src="/js/third-party/json2.js"></script>
+<script type="text/javascript" src="/js/third-party/ypSlideOutMenus.js"></script>
+<script type="text/javascript" src="/js/third-party/ibox.js"></script>
+
+<script type="text/javascript" src="/js/vtcInterfaces.js?version=3.0.1.44 BR"></script>
+<script type="text/javascript" src="/js/vtcPatientInfo.js"></script>
+<script type="text/javascript" src="/js/vtcMainOptions.js"></script>
+<script type="text/javascript" src="/js/datafuncs.js"></script>
+<script type="text/javascript" src="/js/vtcFilasEspera.js"></script>
+<script type="text/javascript" src="/js/VtcKeybFuncs.js?version=3.0.1.44 BR"></script>
+<script type="text/javascript" src="/js/msg_pt_BR.js"></script>
+<script type="text/javascript" src="/js/vtcUtils.js"></script>
+<script type="text/javascript" src="/js/validations/vtcPatientValidations.js"></script>
+<script type="text/javascript" src="/js/vitacare/geral/loading.js"></script>
+<script type="text/javascript" src="/js/vitacare/geral/alert.js"></script>
+
+<script type="text/javascript">
+vitacareUtils.setVitacareContext('/vitacare');
+   
+    if(jQuery) {
+        jQuery.noConflict();
+    }      
+</script></head>
+<body>
+<div class="mainGridContainer" id="content">
+<div class="header">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/vitacare/geral/header.js"></script>
+
+<script type="text/javascript">
+function chamadaUtente(utid, utnome) {
+new Ajax.Request('../../system/vtcGetPatientDetails.JSON.jsp', {
+parameters: {
+VTC_EDITOR:    16758,
+UTID:         utid,
+INFOS:        'name'
+},
+
+onSuccess: function(transport) {
+var jsonResponse;
+try {
+jsonResponse = transport.responseText.evalJSON();
+} catch (err) {
+jsonResponse = null;
+}
+
+var nomeUtente = null;
+
+if (jsonResponse) {
+nomeUtente = jsonResponse.name;
+}
+
+vtcalert("CONFIRM",i18n.getMessage("GERAL.VTCHEADER.CHAMADAUT"),  i18n.getMessage("GERAL.VTCHEADER.NAVFICHAUT")+ ((nomeUtente != null && nomeUtente.length > 0) ? " " + nomeUtente : "")  + "?", "gotoUtente(" + utid + ")", null);
+}
+});
+}
+
+function gotoUtente(utid){
+document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcFichaUtente.jsp?CH=49&UTID=" + utid;
+}
+
+    function openUtente(){
+        clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_UT')
+    }
+    function openUtentesMenu(){
+        clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpUtentes.jsp","Menu Pacientes",600,500)')
+    }
+    function openFerramentas(){
+        clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpFerramentas.jsp","Menu Ferramentas",600,500)')
+    }
+    function openRCCU(){
+        clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpRCCU.jsp","Menu Rastreio do Cancro do Colo do útero",600,500)')
+    }
+    function openInternamento(){
+        clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpInternamento.jsp","Menu Internamento",600,500)')
+    }
+    function openBloco(){
+clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpBloco.jsp","Menu Bloco",600,500)')
+    }
+    function openConsExterna(){
+clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpConsExterna.jsp","Menu Consultas Externas",600,500)')
+    }
+    function openOMeuPerfil(){
+clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpOMeuPerfil.jsp","Menu O Meu Perfil",600,500)')
+    }
+    function openFarmacia(){
+clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpFarmacia.jsp","Menu Farmácia",600,500)')
+    }
+    function openTrocaServ(){
+clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpTrocaServ.jsp","Serviços",600,500)')
+    }
+    function openUrgencia(){
+        clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpUrgencia.jsp","Menu Urgência",600,500)')
+    }
+    function openGestaoMedicamentos(){
+        clickHeaderOption('javascript:showPopup("../Geral/xlets/popUpGestaoMedicamentos.jsp","Gestão de Medicamentos",600,500)')
+    }
+    </script>
+
+
+
+
+<div class="headerdiv" style="width:100%; overflow:auto; display: flex;">
+<img src="/vtcimg/RIO_JANEIRO/CLINICAL/header/vtclogo_nobg.png?v=2017_1" style="object-fit: contain;">
+   <div style="margin-left:30px; display: flex; flex-wrap: wrap; width: 100%; padding-right: 90px;">
+<div class="headerbutton"><img src="/vtcimg/header/pt_BR/bt_menu.gif" title="Menu Principal" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP');"></div>
+            <div class="headerbutton" style="display: inline;"><img src="/vtcimg/header/pt_BR/bt_utentes_1_nobg.png" title="Pacientes" name="menuUtente" id="menuUtente" onclick="openUtentesMenu()"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_utentes_1_nobg.png" title="Pacientes" name="Utente" id="Utente" onclick="openUtente();"></div>
+<div class="headerbutton" style="display: inline;"><img src="/vtcimg/header/pt_BR/bt_agenda_1_nobg.png" title="Agenda" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_AGENDA');"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_consExt_1_nobg.png" title="Consulta Externa" name="ConsExterna" id="ConsExterna" onclick="openConsExterna();"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_internamento_1_nobg.png" title="Internamento" name="Internamento" id="Internamento" onclick="openInternamento();"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_bloco_1_nobg.png" title="Bloco" name="Bloco" id="Bloco" onclick="openBloco();"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_urgencia_1_nobg.png" title="Urgencia" name="Urgencia" id="Urgencia" onclick="openUrgencia();"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_hospDia_1_nobg.png" title="Hospital de dia" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_HOSP_DIA');"></div>
+<div class="headerbutton" style="display: inline;"><img src="/vtcimg/header/pt_BR/bt_indic_1_nobg.png" title="Indicadores" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_STATS');"></div>
+<div class="headerbutton" style="display: inline;"><img src="/vtcimg/header/pt_BR/bt_lembretes_anim.gif" title="Lembretes" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_LEMBRETES');"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_lembretes_1_nobg.png" title="Lembretes" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_LEMBRETES');"></div>
+<div class="headerbutton" style="display: inline;"><img src="/vtcimg/header/pt_BR/bt_msg_anim.gif" title="Mensagens" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_MENSAGENS');"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_msg_1_nobg.png" title="Mensagens" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_MENSAGENS');"></div>
+<div class="headerbutton" style="display: inline;"><img src="/vtcimg/header/pt_BR/bt_perfil_1_nobg.png" title="O meu perfil" name="OMeuPerfil" id="OMeuPerfil" onclick="openOMeuPerfil();"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_refer_1_nobg.png" title="Referenciações" onclick="clickHeaderOption('../../system/getHREF.jsp?SID=VTC_CH_START_MP_REFERENCIACAO');"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_farmacia_1_nobg.png" title="Farmácia" name="Farmacia" id="Farmacia" onclick="openFarmacia();"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_rccu_1_nobg.png" title="Rastreio do Câncer do Colo Uterino" name="RCCU" id="RCCU" onclick="openRCCU();"></div>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_tools_1_nobg.png" title="Ferramentas" name="Ferramentas" id="Ferramentas" onclick="openFerramentas();"></div>
+            <div style="position: absolute; right: 0;">
+                <div class="headerbutton" style="border: none;"><img src="/vtcimg/header/pt_BR/bt_logout_nobg.png" title="Logout" onclick="clickHeaderOption('/vitacare/Vitacare/Geral/xlets/logout.jsp')" style="cursor: pointer;"></div>
+                <div class="headerbutton" style="border: none;"><img src="/vtcimg/header/pt_BR/bt_sair_nobg.png" onclick="vtc_close()" title="Sair" style="cursor: pointer;"></div>
+            </div>
+            <span style="background-color: #134648;">
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_trocaserv_1_nobg.png" title="Trocar de Serviço" name="TROCASERV" id="TROCASERV" onclick="openTrocaServ(Serviços);"></div>
+</span>
+<div class="headerbutton" style="display: none;"><img src="/vtcimg/header/pt_BR/bt_farmacia_1_nobg.png" title="Gestão de Medicamentos" name="Gestão de Medicamentos" id="Gestão de Medicamentos" onclick="openGestaoMedicamentos();"></div>
+</div>
+</div>
+
+
+
+<div class="headerinfo">
+<div class="headertit">3.0.1 BR - FICHA DO PACIENTE</div>
+<div class="headertxt">
+<span style="color:#FFFFFF;">LAURA SOARES ANDERAUS</span>
+MÉDICO DA ESTRATÉGIA DE SAÚDE DA FA...
+<span style="color:#FFFFFF;">SMS CF MARIA DO SOCORR...</span>
+<!-- <span id="servNameSpan"></span> -->
+<span id="divDataHora">18.05.2026 12:43</span>
+</div>
+    </div>
+
+<iframe id="ifrmDataHora" name="ifrmDataHora" style="display:none;" src="/vitacare/Vitacare/Geral/xlets/iDataHora.jsp"></iframe>
+   </div>
+<div id="mask" onclick="maskOnClickAction()" style="display: none;"></div>
+<div id="divLoading" style="left: 510px; top: 296.5px; display: none;">
+<div style="width:130px; height:90px; text-align:center;">
+<div style="padding-top: 20px;">
+<img style="width:105px; height:50px;" src="/vtcimg/pt_BR/loading.gif">
+</div>
+</div><div id="divLoadingToClose" onclick="hideLoading()" style="position: absolute; bottom:0px; right:0px; width:10px; height: 10px; "></div>
+</div>
+
+<div id="vtcalert">
+    <div id="vtcalertmsgarea">
+        <div id="vtcalertmsgarea_left">
+            <img id="vtcalertimgIco">
+        </div>
+        <div id="vtcalertmsgarea_right" class="vtcalerttxt">
+                <p id="vtcalerttitle"></p>
+                <p id="vtcalertmsg"></p>
+                <p id="vtcalertOpt" style="display:none;">
+                    <img id="vtcalertOptPdf" title="Pdf" class="vtcalertbtn" src="/vtcimg/vtcalert/bt_PDF.png" onclick="changefnPrint(0);">
+                    <img id="vtcalertOptPdf" title="Excel" class="vtcalertbtn" src="/vtcimg/vtcalert/bt_Excel.png" onclick="changefnPrint(1);">
+                </p>
+        </div>
+    </div>
+    <div id="vtcalertmsgarea_bottom">
+        <img id="vtcalertbtnCancel" class="vtcalertbtn" src="/vtcimg/vtcalert/bt_cancelar.png" onclick="dismissAlert(0)">
+        <img id="vtcalertbtnOk" class="vtcalertbtn" src="/vtcimg/vtcalert/bt_confirmar.png" onclick="dismissAlert(1)">
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+    var loadDetails = true;
+</script>
+<!-- xlet esquerda --><div id="patientinfodiv" class="patientinfodiv"><!-- area esquerda --><div class="utinfodivfoto" id="utinfoId"><a href="javascript:clickHeaderOption(&quot;http://192.168.1.251/vitacare/Vitacare/Utentes/VtcFichaUtente.jsp?CH=49&amp;UTID=147322&quot;);"><img src="/vtcimg/patientinfo/ut_void_novo.gif" align="left" border="0" vspace="0" hspace="0" style="border-right:1px solid #FFFFFF; border-bottom:1px solid #FFFFFF; margin-right:5px;"></a>25 anos<br>Dta Nasc: 20.02.2001<br>Feminino<br>&nbsp;<br></div><div class="utinfodiv"><div style="color:#FFFFFF; font-weight:bold; margin-bottom:10px; margin-right:6px;">LAURA SOARES ANDERAUS</div><b>NºSUS:</b> 706400168953188<img src="/vtcimg/upload_archive.png" style="border: 0px;width: 22px;" align="absmiddle"><br><b>CPF:</b> 18599234706<img src="/vtcimg/upload_archive.png" style="border: 0px;width: 22px;" align="absmiddle"><br><span class="referredDisease" title=""><img height="10" width="10" src="/vtcimg/refered_desease_icon.png" align="absmiddle"> Doenças Referidas:0</span><span class="confirmedDiagnose" title=""><img height="10" width="10" src="/vtcimg/confirmed_desease_icon.png" align="absmiddle"> Doenças Confirmadas:0</span></div><span style="cursor: pointer;" onclick="UtInfo_changeTab(&quot;RC&quot;);"><img src="/vtcimg/patientinfo/pt_BR/tabSoap_l.gif"></span><span id="UtInfo_spanSOAP" onclick="UtInfo_changeTab(&quot;SOAP&quot;);" style="display: none;"><img src="/vtcimg/patientinfo/tabSoap_r.gif"></span><br><div id="UtInfo_contentClip"><div id="UtInfo_content UtInfo_contentOther">
+<table id="UtSOAP_contentTable" width="219" border="0" cellpadding="0" cellspacing="0" style="display:none; border-top:1px solid #AABDBB;"><tbody><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('soapsubjectivo');">S - Subjetivo&nbsp;<span id="count_soapsubjectivo"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_soapsubjectivo_0_vtc" style="display:;"><td colspan="3" class="utsoaptxt"><div id="UtInfo_SOAPS"></div></td></tr><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('soapobjectivo');">O - Objetivo&nbsp;<span id="count_soapobjectivo"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_soapobjectivo_0_vtc" style="display:;"><td colspan="3" class="utsoaptxt"><div id="UtInfo_SOAPO"></div></td></tr><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('soapavaliacao');">A - Avaliação&nbsp;<span id="count_soapavaliacao"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_soapavaliacao_0_vtc" style="display:;"><td colspan="3" class="utsoaptxt"><div id="UtInfo_SOAPA"></div></td></tr><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('soapplano');">P - Plano&nbsp;<span id="count_soapplano"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_soapplano_0_vtc" style="display:;"><td colspan="3" class="utsoaptxt"><div id="UtInfo_SOAPP"></div></td></tr></tbody></table><table id="UtInfo_contentTable" width="219" border="0" cellpadding="0" cellspacing="0" style="border-top:1px solid #AABDBB;"><tbody><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('problemas');">Problemas Ativos&nbsp;<span id="count_problemas"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_problemas_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Não há problemas ativos.</td></tr><script type="text/javascript">if(document.getElementById("count_problemas")){document.getElementById("count_problemas").innerHTML = ""}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('MEDICAMENTOSCRONICOS');">Medicação Crônica&nbsp;<span id="count_MEDICAMENTOSCRONICOS"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_MEDICAMENTOSCRONICOS_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Não há medicação crônica.</td></tr><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('MEDICAMENTOSACTIVOS');">Outra Medicação em uso&nbsp;<span id="count_MEDICAMENTOSACTIVOS"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_MEDICAMENTOSACTIVOS_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Não há medicação em uso.</td></tr><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('ultactomedico');">Últ. Atend. Médico&nbsp;<span id="count_ultactomedico">(1)</span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_ultactomedico_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt"><b>15.04.2026</b><br>Atendimento SOAP<br>MARCOS ADAMS GOLDRAICH</td></tr><script type="text/javascript">if(document.getElementById("count_ultactomedico")){document.getElementById("count_ultactomedico").innerHTML = "(1)";}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('ultactodent');">Últ. Atend. Odonto&nbsp;<span id="count_ultactodent"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_ultactodent_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Sem registros</td></tr><script type="text/javascript">if(document.getElementById("count_ultactodent")){document.getElementById("count_ultactodent").innerHTML = ""}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('ultactonaomed');">Últ. Atend. Não Médico&nbsp;<span id="count_ultactonaomed"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_ultactonaomed_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Sem registros</td></tr><script type="text/javascript">if(document.getElementById("count_ultactonaomed")){document.getElementById("count_ultactonaomed").innerHTML = ""}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('ultactoenf');">Últ. Atend. Enfermagem&nbsp;<span id="count_ultactoenf">(1)</span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_ultactoenf_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt"><b>13.05.2026</b><br>Atendimento técnico de enfermagem<br>ERICA DE ARAUJO MEIRELES</td></tr><script type="text/javascript">if(document.getElementById("count_ultactoenf")){document.getElementById("count_ultactoenf").innerHTML = "(1)";}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('ultactoficha');">Últ. Reg. VD ACS/TACS&nbsp;<span id="count_ultactoficha"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_ultactoficha_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Sem registros</td></tr><script type="text/javascript">if(document.getElementById("count_ultactoficha")){document.getElementById("count_ultactoficha").innerHTML = ""}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('monitorizacao');">Monitorização&nbsp;<span id="count_monitorizacao"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_monitorizacao_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Sem parâmetros registrados.</td></tr><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('alergias');">Alergias&nbsp;<span id="count_alergias"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_alergias_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Sem alergias registradas.</td></tr><script type="text/javascript">if(document.getElementById("count_alergias")){document.getElementById("count_alergias").innerHTML = ""}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('alertas');">Alertas&nbsp;<span id="count_alertas">(6)</span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_alertas_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt"><img src="/vtcimg/patientinfo/ico_green.gif" align="absmiddle">&nbsp;&nbsp;Rastreio Câncer de Cólon e Reto</td></tr><tr id="sub_alertas_1_vtc" style="display:none;"><td colspan="3" class="utinfotxt"><img src="/vtcimg/patientinfo/ico_green.gif" align="absmiddle">&nbsp;&nbsp;Rastreio Câncer de Mama</td></tr><tr id="sub_alertas_2_vtc" style="display:none;"><td colspan="3" class="utinfotxt"><img src="/vtcimg/patientinfo/ico_red.gif" title="BCG a registrar: 1 (registrou 0)
+HB a registrar: 3 (registrou 0)
+VOP a registrar: 4 (registrou 0)
+VIP a registrar: 1 (registrou 0)
+DNG a registrar: 1 (registrou 0)
+DTP a registrar: 2 (registrou 0)
+COVID-19 a registrar: 3 (registrou 0)
+SCR a registrar: 2 (registrou 0)
+HPV Quadri a registrar: 2 (registrou 0)
+dT a registrar: 1 (registrou 0)
+FA a registrar: 2 (registrou 0)
+VARC a registrar: 2 (registrou 0)
+Meningo ACW135Y a registrar: 1 (registrou 0)" align="absmiddle">&nbsp;&nbsp;Vacinas</td></tr><tr id="sub_alertas_3_vtc" style="display:none;"><td colspan="3" class="utinfotxt"><img src="/vtcimg/patientinfo/ico_red.gif" title="Registro da idade gestacional e data provÃ¡vel de parto" align="absmiddle">&nbsp;&nbsp;Gestante</td></tr><tr id="sub_alertas_4_vtc" style="display:none;"><td colspan="3" class="utinfotxt"><img src="/vtcimg/patientinfo/ico_red.gif" title="Sem registro de IMC" align="absmiddle">&nbsp;&nbsp;IMC (Obesidade)</td></tr><tr id="sub_alertas_5_vtc" style="display:none;"><td colspan="3" class="utinfotxt"><img src="/vtcimg/patientinfo/ico_red.gif" title="Sem registro de citologia" align="absmiddle">&nbsp;&nbsp;Rastreio Câncer de Colo Uterino</td></tr><script type="text/javascript">if(document.getElementById("count_alertas")){document.getElementById("count_alertas").innerHTML = "(6)";}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('lembretes');">Lembretes&nbsp;<span id="count_lembretes"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_lembretes_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Não há lembretes</td></tr><script type="text/javascript">if(document.getElementById("count_lembretes")){document.getElementById("count_lembretes").innerHTML = ""}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('progsaude');">Programas de Saúde&nbsp;<span id="count_progsaude">(1)</span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_progsaude_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Rastreio de Câncer de Colo Uterino - Acompanhado</td></tr><script type="text/javascript">if(document.getElementById("count_progsaude")){document.getElementById("count_progsaude").innerHTML = "(1)";}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('mensagens');">Mensagens&nbsp;<span id="count_mensagens"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_mensagens_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Não há mensagens.</td></tr><script type="text/javascript">if(document.getElementById("count_mensagens")){document.getElementById("count_mensagens").innerHTML = ""}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('observacoes');">Notas e Observações&nbsp;<span id="count_observacoes"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_observacoes_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Não há notas ou observações.</td></tr><script type="text/javascript">if(document.getElementById("count_observacoes")){document.getElementById("count_observacoes").innerHTML = ""}</script><tr><td colspan="3" style="height: 10px; background-color:#AABDBB;"></td></tr><tr style="background-color:#FFFFFF; vertical-align: middle;"><td width="180" class="utinfotit" onclick="UtInfo_eXpand('confidenciais');">Notas Confidenciais&nbsp;<span id="count_confidenciais"></span></td><td width="14" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"><img src="/vtcimg/patientinfo/img_title.gif"></td><td width="25" style="background: url(/vtcimg/patientinfo/rep_title.gif) repeat-x;"></td></tr><tr id="sub_confidenciais_0_vtc" style="display:none;"><td colspan="3" class="utinfotxt">Não há notas confidenciais no último ano.</td></tr><script type="text/javascript">if(document.getElementById("count_confidenciais")){document.getElementById("count_confidenciais").innerHTML = ""}</script></tbody></table></div></div><!-- fim esquerda --><!-- footer esquerda --><div id="UtInfoScrollPai"><div id="UtInfoScroll"><img src="/vtcimg/patientinfo/bt_down_1.gif" style="cursor: pointer;" align="right" border="0" vspace="0" hspace="0" onmousedown="UtInfo_startScrollDown();" onmouseout="UtInfo_stopScroll();" onmouseup="UtInfo_stopScroll();"><img src="/vtcimg/patientinfo/bt_up_1.gif" style="cursor: pointer;" align="right" border="0" vspace="0" hspace="0" onmousedown="UtInfo_startScrollUp();" onmouseout="UtInfo_stopScroll();" onmouseup="UtInfo_stopScroll();"></div></div><!-- fim xlet esquerda --></div>
+
+        <script type="text/javascript">
+        UtInfo_calcHeight();
+            UtInfo_showHideTabSOAP(false);
+        </script>
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/third-party/prototype.js"></script>
+<script type="text/javascript" src="/js/detalheJs.js"></script>
+
+
+<script type="text/javascript">
+    //Variavel para os popup dos grasficoS
+    var vtcOpAnterior = "";
+    //Variavel para o titulo da Impressão
+    var printTitle = "";
+    ////Variavel auxiliar para mostrar o cabeçalho com a informação do utente
+    var printInfo = "";
+    //variavel episodio clinico
+    var epis_id = -1;
+    var epis_estado = 0;
+    var validado=false;
+    var tipo_epis = '';
+    var tipo_epis_mater = '';
+    var hasClassificationRisk = 'false';
+    //Variaveis de Controlo de Sub-Menus JS
+    //Utentes
+    var numOpUtente = 0;
+    var singleOpUtente = "";
+    //Plano de Enfermagem
+    var numOpPlanoEnf = 0;
+    var singleOpPlanoEnf = "";
+    //Variaves para o tratamento Row Selecionada
+    formPath = 'document.vtcRows_selectRowsForm';
+    inputName = 'vtcRows_selectedRow';
+    multiSelect = false;
+    //Variavel que vai guardar o id do tipo do ultimo acto
+    var tipoUltimoActoId = 0;
+    var actoId = 0;
+    //Variavel que vai guardar se estamos perante um episodio de acompanhamento que terminou
+    var isAltaAcompanhamento;
+      //Variavel que vai guardar o id do acto de um determinado episodio de acompanhamento
+    var selectedEpisId;
+    //Variavel que vai guardar o id do acto de um determinado episodio de acompanhamento
+    var episActoId;
+    //Variavel que vai guardar o id de um tipo de acto de um determinado episodio
+    var episActoTipoId;
+    //Variaveis globais de JS para guardar id's de linhas selecionadas
+    var actoIsolado = "";
+    var accaoIsolado = "";
+    //Variáveis  / Funções relacionadas com a navegação entre actos do utente
+    var strActosIDs = "";
+    var strTiposActosIDs = "";
+    var strActosDatas = "";
+    var strTiposActosDescricao = "";
+    //Navegação de PrograMAS DE saUDE DO PopUp
+    var arrProgSaude = null;
+    //Variaveis para imprimir actoCitologia
+    var actId = 0;
+    var tipoActId = 0;
+    var printCitologia = false;
+    var printResCitologia = false;
+    var waitPrintResCitologia = false;
+    var printVacinacao = false;
+    var printQuestionarioInvestigacao = false;
+    var iBoxSource;
+    var actoAnt = 0;
+    var actoPost = 0;
+    var tipoActoAnt = 0;
+    var tipoActoPost = 0;
+    //Variavel para determinar como são mostradas as análises
+    var opcaoAnalises = -1;
+    //OPção de Visualização
+    var TOP = "";
+    var TYPE = -1;
+    var tipoAccId = null;
+    function updateState(){
+        disableButton('admissao');disableButton('transferir');disableButton('validar');disableButton('anulaAlta');disableButton('altaAdmin');disableButton('alta');
+        disableButton('admitirInternamento');disableButton("interromper");disableButton("readmitir");disableButton("colocarCama");disableButton('retirarCama');
+        disableButton("imprimirBamHosp");hideButton('transferir');hideButton('admissao');hideButton('validar');hideButton('anulaAlta');hideButton('altaAdmin');
+        hideButton('alta');hideButton('admitirInternamento');hideButton("interromper");hideButton("readmitir");hideButton("colocarCama");hideButton('retirarCama');
+        hideButton("imprimirBam");hideButton("imprimirBamHosp");
+        if(true){
+            enableButton('admitirInternamento');
+            showButton('admitirInternamento');
+        }
+        if(false && epis_id > 0){
+        if(true){// utente ainda não esta acamado
+           showButton('colocarCama');
+        if(false){ // Sala para o qual foi encaminhado têm camas
+        enableButton('colocarCama');
+        }            
+           disableButton('transferir');
+           hideButton('transferir');
+       }else{
+           enableButton('retirarCama');
+           showButton('retirarCama');
+           enableButton('transferir');
+              showButton('transferir');
+       }
+   }else{
+    showButton('colocarCama');
+    disableButton("colocarCama");
+   
+   }
+       
+        if(false){
+        disableButton('cuidados');
+            hideButton('cuidados');
+        }
+       
+        //admissao,validar,anulaAlta,altaAdmin,alta
+        if (tipo_epis = 'TYPE_INTERNAMENTO'){
+            switch(epis_estado){
+                case 1:
+
+                       break;
+                   case 3:
+
+                       break;
+                   case 2:
+                       enableButton('admissao');
+                       showButton('admissao');
+                       break;
+                   case 4:
+                       enableButton('transferir');
+                       showButton('transferir');
+                       enableButton('alta');
+                       showButton('alta');
+                       enableButton("interromper");
+                       showButton("interromper");
+                       break;
+                   case 5:
+                       enableButton('transferir');
+                       showButton('transferir');
+                    enableButton("readmitir");
+                    showButton("readmitir");
+                       break;
+                   case 6:
+                           enableButton('altaAdmin');
+                           showButton('altaAdmin');
+                           enableButton('anulaAlta');
+                           showButton('anulaAlta');
+                       break;
+                   case 7:
+                        enableButton('admitirInternamento');
+                        showButton('admitirInternamento');
+                       break;
+            }
+        }
+    }
+    function AJAXUpdateState(newState){
+        try{
+            new Ajax.Request('xlets/updateState.jsp', {
+                parameters: {
+                    EPISID: -1,
+                    STATE: newState
+                },
+                onComplete: function(transport) {
+                    if (200 != transport.status) {
+                    }else{
+                        epis_estado=newState;
+                        updateState();
+                        document.getElementById('iframecontent').src = document.getElementById('iframecontent').src;
+                    }
+                }
+            });
+        }catch (e) { /* do nothing */ }
+    }
+    function goFichaUtente(utId){
+        if(utId>0){
+            document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcFichaUtente.jsp?CH=49&UTID="+utId;
+            showLoading();
+        }
+    }
+    function goFichaFamilia(famId){
+        if(famId>0){
+            document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcRegistoFamilia.jsp?CH=698&OP=VIEW&IDFAMILIA="+famId;
+            showLoading();
+        }
+    }
+    function gotoEpis(inEpis_id,opt){
+        VtcMain_setContentSrc("xlets/iDetalhe.jsp?VTCOP="+opt+"&UTID=147322&EPISID="+inEpis_id);
+    }
+    function goToMapaEnfermarias(recId){
+        document.location.href="../../Internamento/VtcMapaEnfermarias.jsp?DATA=18.05.2026&RECID=" + recId;
+    }
+    function previousAct() {
+        if (actoAnt > 0) {
+            showLoading();
+            var oSelected = eval(formPath + "." + inputName);
+            oSelected.value = "actoIsolado_" + actoAnt + "_" + tipoActoAnt;
+            disableButton("compararParametros");
+            disableButton("novaAccao");
+           
+                enableButton("novoActo");
+           
+            try {
+                eval("SlOp_slideNovaAccao" + tipoActoAnt + "_numOp");
+                enableButton("novaAccao");
+            } catch(e) {
+                disableButton("novaAccao");
+            }
+            enableButton("editarActo");
+            VtcMain_setVisibleHeader("headerDefault");
+            VtcMain_setContentSrc("xlets/iActo.jsp?VTCOP=VIEW&ACTID=" + actoAnt + "&UTID=147322");
+        }
+    }
+    function nextAct() {
+        if (actoPost > 0) {
+            showLoading();
+            var oSelected = eval(formPath + "." + inputName);
+            oSelected.value = "actoIsolado_" + actoPost + "_" + tipoActoPost;
+            disableButton("compararParametros");
+            disableButton("novaAccao");
+           
+                enableButton("novoActo");
+           
+            try {
+                eval("SlOp_slideNovaAccao" + tipoActoPost + "_numOp");
+                enableButton("novaAccao");
+            } catch(e) {
+                disableButton("novaAccao");
+            }
+            enableButton("editarActo");
+            VtcMain_setVisibleHeader("headerDefault");
+            VtcMain_setContentSrc("xlets/iActo.jsp?VTCOP=VIEW&ACTID=" + actoPost + "&UTID=147322");
+        }
+    }
+    /***************************************************************************
+     * Quando se carrega numa linha para seleção
+     **************************************************************************/
+    function clickRow(rowId) {
+        if (jQuery('#ibox_framecontent') && jQuery('#ibox_framecontent')[0] != null && jQuery('#ibox_framecontent')[0].src.indexOf("popup") >= 0) {
+            return;
+        }
+        actoIsolado = "";
+        accaoIsolado = "";                      
+        //Se a linha não for selecionavel
+        if (rowId == "" || rowId == null) {
+            return;
+        }
+       
+        if (MnOp_selectedOption == "actosIsolados" || MnOp_selectedOption == "oplatConsultas" || MnOp_selectedOption == "visitasAgente" ||
+            MnOp_selectedOption == "resumoClinico" || MnOp_selectedOption == "prontuario" || MnOp_selectedOption == "ResEpisodios" || MnOp_selectedOption == "SaudeEscolar" ||
+            MnOp_selectedOption == "UltEpisodios" || MnOp_selectedOption == "pcepisodios" || MnOp_selectedOption == "acaoColectiva" ||
+            MnOp_selectedOption == "episodios" || MnOp_selectedOption == "infoInfClin" || MnOp_selectedOption == "EPISresumo" ||
+            MnOp_selectedOption == "pcexames" || MnOp_selectedOption == "pcanaliseslaboratoriais" ||
+            MnOp_selectedOption == "programas" || MnOp_selectedOption == "consultasImportantes" || MnOp_selectedOption == "reqMcdt" ||
+            MnOp_selectedOption == "historicodentes" || MnOp_selectedOption == "fichaAula" || MnOp_selectedOption == "actoAcolhimento"){
+            multiSelect = false;
+            selectRow(rowId);
+            var oSelected = eval(formPath + "." + inputName);
+            var valor = oSelected.value;
+            disableButton("detalhes");
+            disableButton("compararParametros");
+            disableButton("novaAccao");
+            disableButton("editarActo");
+            disableButton("detalhe");
+            disableButton("detEpisodio");
+            disableButton("editarEpisodio");
+            disableButton("BtOp_declaracao_mat");
+            disableButton("editarActo");
+            disableButton("imprimirCovid");
+            hideButton("imprimirCovid");
+            disableButton("editarActoColetivo");
+            if (valor != "") {
+                enableButton("detalhes");
+            } else {
+                disableButton("detalhes");
+            }
+           
+                enableButton("novoActo");
+           
+            accaoIsolado = "";
+            // acto isolado selecionado
+            if (valor.indexOf("actoIsolado_") >= 0) {
+                actoIsolado = valor.substring(valor.indexOf("actoIsolado_") + 12, valor.lastIndexOf("_"));
+                tipoActoId = valor.substring(valor.lastIndexOf("_")+1,  valor.lastIndexOf("#"));
+                var obito= "";
+                try{
+                    obito = valor.substring(valor.lastIndexOf("#")+1);
+                } catch (e) { /* do nothing */ }
+                try{
+                    eval("SlOp_slideNovaAccao" + tipoActoId + "_numOp");
+                    if(obito == ""){
+                        enableButton("novaAccao");
+                    }
+                } catch(e){
+                    disableButton("novaAccao");
+                }
+                if(obito == ""){
+                    enableButton("editarActo");
+                }else{
+                    disableButton("novaAccao");
+                   // disableButton("editarActo");
+                }
+                enableButton("editarActo");
+            } else if (valor.indexOf("acaoColetiva_") >= 0) {
+                   enableButton("editarActoColetivo");
+            } else if (valor.indexOf("accaoIsolado_") >= 0) {
+                accaoIsolado = valor.substring(valor.indexOf("accaoIsolado_") + 13, valor.length);
+            } else if (valor.indexOf("acto_") >= 0) {
+                enableButton("detalhe");
+                hideButton("imprimirCNS");
+                enableButton("editarActo");
+                enableButton("resumo");
+                enableButton("editarEpisodio");
+                enableButton("BtOp_declaracao_mat");
+                actoId = valor.substring(valor.lastIndexOf("_")+1, valor.length);
+            }else if (valor.indexOf("epis_") >= 0) {
+                epis_id = valor.substring(valor.lastIndexOf("epis_")+5, valor.length);
+                if(MnOp_selectedOption != "pcepisodios" && MnOp_selectedOption != "infoInfClin" ){
+                    VtcMain_setVisibleHeader("headerEpisodios");
+                }
+                enableButton("resumo");
+                hideButton("imprimirCNS");
+                enableButton("detEpisodio");
+                enableButton("editarEpisodio");
+                enableButton("BtOp_declaracao_mat");
+                enableButton("imprimirBamHosp");
+            }else{
+                if (MnOp_selectedOption != "episodios" && MnOp_selectedOption != "EPISresumo"){
+                    disableButton("resumo");
+                }
+                disableButton("detEpisodio");
+                hideButton("imprimirCNS");
+                disableButton("editarEpisodio");
+                disableButton("BtOp_declaracao_mat");
+
+                disableButton("editarActo");
+                if (oSelected.value != "") {
+                    enableButton("editarActo");
+                }
+            }
+        // Informação Clínica
+        } else if (MnOp_selectedOption == "parametrosBio" || MnOp_selectedOption == "pcparametrosmonitorizacao" || MnOp_selectedOption == "analises" || MnOp_selectedOption == "mcdts" || MnOp_selectedOption == "laboratoriaisLaudos") {
+            multiSelect = true;
+            selectRow(rowId);
+            var oSelected = eval(formPath + "." + inputName);
+            disableButton("detalhes");
+            hideButton("imprimirCNS");
+            disableButton("compararParametros");
+            if (oSelected.value != "") {
+                opcaoAnalises = isSameType(oSelected.value);
+                if(opcaoAnalises >= 0){
+                    enableButton("compararParametros");
+                }
+            }
+        // Vacinação
+        } else if (MnOp_selectedOption == "vacinacao") {
+
+               selectRow(rowId);
+            var oSelected = eval(formPath + "." + inputName);
+            hideButton("imprimirCNS");
+            disableButton("detalhes");
+            hideButton("detalhes");
+
+            if (oSelected.value!="") {
+                enableButton("detalhes");
+            }
+        }        
+        //rows do historico de episodios de acompanhamento
+        var parametersRow = rowId.split('_');
+        if(parametersRow.length == 5 && parametersRow[0] == "imprimirAlta"){      
+            enableButton("imprimirAlta");
+            enableButton("resumo");
+            selectedEpisId = parametersRow[1];
+            episActoTipoId = parametersRow[2];
+            episActoId = parametersRow[3];
+            isAltaAcompanhamento = parametersRow[4];
+        if(isAltaAcompanhamento){
+        enableButton("imprimirAlta");
+        }else{
+        disableButton("imprimirAlta");
+        }
+        }
+    }
+
+    /***************************************************************************
+     * Quando se carrega double-click numa linha para seleção
+     **************************************************************************/
+    function doubleClickRow(rowId){
+     
+        actoIsolado = "";
+        accaoIsolado = "";
+        acaoColectiva = "";
+        //Se a linha não for selecionavel
+        if (rowId == "" || rowId == null) {
+            return;
+        }
+
+        var iboxframecontent = document.getElementById("ibox_framecontent");
+       
+        if (iboxframecontent && iboxframecontent.src && iboxframecontent.src.indexOf("popupHelpDocs.jsp") >= 0) {
+            // Ajuda
+            window.open("/helpdocs/" + rowId, "_blank", "directories=0, fullscreen=1, location=0, menubar=0, resizable=0, scrollbars=0, status=0, titlebar=0, toolbar=0");
+        } else if (iboxframecontent && iboxframecontent.src && iboxframecontent.src.indexOf("popupActos.jsp") >= 0) {
+            // Lista consultas
+            showLoading();
+            tipoAccId = rowId.substring(rowId.lastIndexOf("_") + 1, rowId.lastIndexOf("#"));
+            rowId = rowId.substring(rowId.indexOf("actoIsolado_") + 12, rowId.lastIndexOf("#"));
+            iboxframecontent.src = "xlets/popupDetActo.jsp?ACTID=" + rowId + "&UTID=147322&TOP=" + TOP + "&TYPE=" + TYPE+"&TACCID="+tipoAccId;
+        } else if (iboxframecontent && iboxframecontent.src && iboxframecontent.src.indexOf("popupInfoClinicaResClinico.jsp") >= 0) {
+            // Lista Programas
+            showLoading();
+            rowId = rowId.substring(rowId.indexOf("progSaude_") + 10);
+            iboxframecontent.src = "xlets/popupInfoClinica.jsp?VTCOP=" + rowId + "&UTID=147322";
+        } else if (iboxframecontent && iboxframecontent.src && iboxframecontent.src.indexOf("popupInfoClinica.jsp") >= 0 && rowId.indexOf("progSaude_") >= 0) {
+            // Lista Programas
+            showLoading();
+            rowId = rowId.substring(rowId.indexOf("progSaude_") + 10);
+            iboxframecontent.src = "xlets/popupInfoClinica.jsp?VTCOP=" + rowId + "&UTID=147322";
+        } else if (iboxframecontent && iboxframecontent.src && iboxframecontent.src.indexOf("popupInfoClinica.jsp") >= 0 && iboxframecontent.src.indexOf("MEDICACAO") < 0) {
+            // Prametros
+            showLoading();
+            iboxframecontent.src = "xlets/popupGraphParams.jsp?VTCOP=GRAFICOSPARAM&UTID=147322&PARAMETROS=" + rowId + "&OPCAOANT=" + vtcOpAnterior;
+        } else {
+            // Outros
+            if (MnOp_selectedOption == "actosIsolados" || MnOp_selectedOption == "oplatConsultas" || MnOp_selectedOption == "visitasAgente" ||
+            MnOp_selectedOption == "resumoClinico" || MnOp_selectedOption == "prontuario" ||MnOp_selectedOption == "episodios" || MnOp_selectedOption == "SaudeEscolar" ||
+            MnOp_selectedOption == "infoInfClin" || MnOp_selectedOption == "programas" ||
+            MnOp_selectedOption == "pcepisodios" || MnOp_selectedOption == "acaoColectiva" ||
+            MnOp_selectedOption == "consultasImportantes" || MnOp_selectedOption == "fichaAula" || MnOp_selectedOption == "actoAcolhimento"){
+                if(rowId != "") {
+                    if(!isRowSelected(rowId)) {
+                        selectRow(rowId);
+                    }
+                }
+                multiSelect = false;
+                var oSelected = eval(formPath + "." + inputName);
+                var valor = oSelected.value;
+                var tmpId = oSelected.value.split("_");
+                actId = tmpId[1];
+                tipoActId = tmpId[2];
+               
+                if(tmpId[4]!=null && tmpId[4]!="" && tmpId[4].indexOf("#")>=0){
+                tipoAccId = tmpId[4].substring(0, tmpId[4].lastIndexOf("#"));
+                }
+               
+                var accaoIsolado = "";
+                // acto isolado selecionado
+                if (valor.indexOf("actoIsolado_") >= 0) {                  
+                    actoIsolado = valor.split("_")[1];                        
+                   
+                        showLoading();
+                        VtcMain_setVisibleHeader("headerDefault");
+                        if(tipoAccId!=null){
+                        VtcMain_setContentSrc("xlets/iActo.jsp?VTCOP=VIEW&ACTID=" + actoIsolado + "&UTID=147322&TACCID="+tipoAccId);
+                        }else{
+                        VtcMain_setContentSrc("xlets/iActo.jsp?VTCOP=VIEW&ACTID=" + actoIsolado + "&UTID=147322");
+                        }
+                        hideButton("detalhes");
+                        enableButton("editarActo");
+                   
+                } else if (valor.indexOf("actoAcolhimento") >= 0) {
+                    showLoading();
+                    VtcMain_setVisibleHeader("headerDefault");
+                    VtcMain_setContentSrc("xlets/iVtcAcolhimentoDemandaEspontanea.jsp?VTCOP=VIEW&ACTID=" + actId + "&UTID=147322");
+                    hideButton("detalhes");
+                } else if (valor.indexOf("acaoColetiva_") >= 0) {
+                    if(rowId.indexOf("utenteId")>=0){
+                        utenteId = rowId.split("_");
+                        showLoading();
+                        document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcFichaUtente.jsp?CH=49&UTID=" + utenteId[1];
+                    } else if(rowId.indexOf("acaoColetiva_") >= 0){
+                        acaoColectiva = valor.substring(valor.indexOf("_") + 1);
+                       
+                            showLoading();
+                            VtcMain_setVisibleHeader("headerDefault");
+                            VtcMain_setContentSrc("xlets/iVtcAcaoColetiva.jsp?OP=VIEW&ACTID=" + acaoColectiva + "&UTID=147322");
+                            hideButton("detalhes");
+                            enableButton("editarActoColetivo");
+                       
+                    }
+                } else if (valor.indexOf("accaoIsolado_") >= 0) {
+                    accaoIsolado = valor.substring(valor.indexOf("accaoIsolado_") + 13, valor.length);
+                   
+                        document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcAccao.jsp?CH=106&VTCOP=VIEW&ACCID=" + accaoIsolado + "&UTID=147322";
+                   
+                } else if (valor.indexOf("progSaude_") >= 0) {
+                    var prog = valor.substring(valor.indexOf("progSaude_") + 10);
+                    clickMainChildOption("oplatProgramas","ResumoProgSaude", false);
+                    VtcMain_setContentSrc("xlets/iProgSaude.jsp?VTCOP=" +  prog + "&UTID=147322");
+                }else if (valor.indexOf("epis_") >= 0) {
+                    var epis_id2 = valor.substring(valor.lastIndexOf("epis_")+5, valor.length);
+                    VtcMain_setContentSrc("xlets/iDetalhe.jsp?VTCOP=UltEpisodios&UTID="+147322+"&EPISID="+epis_id2);
+                    VtcMain_setVisibleHeader("headerEpisodios");
+                }
+             } else if (MnOp_selectedOption == "reqMcdt") {
+                var valor = rowId;
+                var mcdt = valor.substring(valor.indexOf("mcdt_") + 5);
+                showPopup("../Utentes/xlets/popupReqMcdts.jsp?Accao=" + mcdt);
+            } else if (MnOp_selectedOption == "vacinacao") {
+                if(rowId != "") {
+                    if(!isRowSelected(rowId)) {
+                        selectRow(rowId);
+                    }
+                }
+                multiSelect = false;
+                var oSelected = eval(formPath + "." + inputName);
+                if (oSelected.value && oSelected.value.length > 0) {
+                    var consId = ((oSelected.value).split('_'))[1];
+                    showPopup("xlets/popupInfoClinica.jsp?UTID=147322&VTCOP=DETVACINACAO&CONSID=" + consId, "Detalhes de Vacinação", 1000, 600);
+                    showLoading();
+                }
+            } else if (MnOp_selectedOption == "parametrosBio" || MnOp_selectedOption == "pcparametrosmonitorizacao" ||
+                    MnOp_selectedOption == "pcexames" || MnOp_selectedOption == "pcanaliseslaboratoriais" ||
+             MnOp_selectedOption == "analises" || MnOp_selectedOption == "mcdts" || MnOp_selectedOption == "laboratoriaisLaudos") {
+                if(rowId != "") {
+                    if(!isRowSelected(rowId)) {
+                        selectRow(rowId);
+                    }
+                }
+                multiSelect = false;
+                var oSelected = eval(formPath + "." + inputName);
+                if (oSelected.value && oSelected.value.length > 0) {
+                    if(oSelected.value.indexOf("DESC") >= 0){
+                        VtcMain_setVisibleHeader("headerParamDescritivos");
+                    }else{
+                        VtcMain_setVisibleHeader("headerGraficos");
+                    }
+                        VtcMain_setContentSrc("xlets/iFiltros.jsp?VTCOP=GRAFICOSPARAM&UTID=147322&PARAMETROS=" + oSelected.value);
+                }
+            } else if (MnOp_selectedOption == "infoConsultas") {
+                showLoading();
+                document.location.href = "../../Agenda/VtcAgenda.jsp?"+rowId;
+             }
+        }
+    }
+    /***************************************************************************
+     *    Confirm
+     **************************************************************************/
+    function clickConfirm(){
+        var contentForm = iframeContent.contentForm;
+        if (contentForm) {
+            contentForm.action = "iDetalhe.jsp?VTCOP=SAVE_EDIT&UTID=147322";
+            contentForm.target = "iframeContent";
+            contentForm.submit();
+            showLoading();
+        }
+    }
+    /***************************************************************************
+     *    Cancel
+     *    Se actoId > 0 redireciona para a página de detalhes
+     *    senão redireciona para a página de detalhes do utente
+     **************************************************************************/
+    function clickCancel(){
+        vtcalert("CONFIRM", "Atenção", "Deseja cancelar a operação?", "sairEdicaoUtente(147322)" , null);
+    }
+   
+    /***************************************************************************
+     * Tratamento dos botoes do Header Options
+     **************************************************************************/
+    function HdOp_clickHeaderOption(opId, event){
+        var img = document.getElementById(opId);
+        // Se a imagem não existe não faz mais nada
+        if (!img) {
+            return;
+        }
+        // Se a imagem não está disponível não faz mais nada
+        if (img.src.indexOf("_1.gif") < 0) {
+            return;
+        }
+        switch (opId) {
+            case "historicoDispensas":
+               
+                        document.location.href = "http://192.168.1.251/vitacare/Vitacare/Farmacia/Historico.jsp?CH=75&UTID=147322";
+               
+                break;
+            case "entidades":
+               
+                        document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/EntidadesUtente.jsp?CH=190&UTID=147322";
+               
+                break;
+        }
+    }
+   
+     function convertToTemp(utenteId){
+    new Ajax.Request('xlets/iListaPacientesTrad.jsp', {
+               parameters: {
+                   VTCOP: 'ConvertToTemp',
+                   UT_ID: utenteId
+               }
+            ,onComplete: function(transport) {
+            document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcFichaUtente.jsp?CH=49&UTID=" + utenteId;
+            }
+        });
+     }
+     
+    /***************************************************************************
+     * Tratamento dos botoes do Bottom Options
+     **************************************************************************/
+    function BtOp_clickBottomOptionOld(opId, event) {
+   
+        var img = document.getElementById(opId);
+        // Se a imagem não existe não faz mais nada
+        if (!img) {
+            return;        
+        }        
+        var isPNGimage = false;        
+        // Se a imagem não está disponível não faz mais nada      
+        if(img.src.indexOf(".png") > 0){
+            isPNGimage = true;
+        }        
+        if ((isPNGimage == false && img.src.indexOf("_1.gif") < 0) || (isPNGimage && img.src.indexOf("_1.png") < 0)) {
+            return;
+        }
+       
+        var oSelected = eval(formPath + "." + inputName);
+        var valor = oSelected.value;        
+       
+        switch (opId) {
+       case "converterTemp":
+        vtcalert("CONFIRM", "Atenção", "Tem a certeza que quer converter o paciente ?tradicional? num paciente temporário?", "convertToTemp(147322);" , null);
+       break;
+            case "imprimirCNS":
+                showPopup("xlets/popupPrintCard.jsp?UTID=147322" , "Impressão de Cartão");
+            break;
+            //Opção para edição dos utentes nas UPAS
+            case "imprimirBam":
+            showPopup("../Documentacao/xlets/popupPrintBAM.jsp?TITULO=BAM&UTID=147322&EPISID="+epis_id , "Boletim de Atendimento Médico");
+                break;
+            case "imprimirBamHosp":
+                showPopup("../Documentacao/xlets/popupPrintBAMHospitalMunicipal.jsp?TITULO=BAM&UTID=147322&EPISID="+epis_id,"Boletim de Atendimento Médico");
+                showLoading();
+                break;
+            case "imprimirPulseira":
+                showPopup("../Documentacao/xlets/popupPrintPulseira.jsp?UTID=147322&EDIT=16758&ENTID=10134&EPISID="+epis_id,"Impressão de Pulseira");
+                break;
+            case "imprimirProntuarioPaciente":                  
+            var printProntuarioUrl = "../Documentacao/xlets/printFullData.jsp?UTID=147322&tipoDeclaracao=DOC_TYPE_FULLDATA";
+           
+            var prontuarioTitle = "Laura Soares Anderaus";
+            showPopup(printProntuarioUrl, "Prontuário Eletrônico do Paciente: "+ prontuarioTitle);
+                showLoading();
+                break;
+            case "imprimirCovid":
+            showLoading();
+              var aux = oSelected.value.split("_");
+             
+              var id = null;
+              if(aux.length > 0 && aux[1] > 0){
+              id = aux[1];
+              } else {
+              id = 0;
+              }
+            showPopup("../Documentacao/xlets/popupPrintFichaCovid19.jsp?UTID=147322&ACTID="+id,"Imprimir Ficha de Investigação Covid 19");
+
+                break;
+            case "imprimirAlta":
+                showPopup("../Documentacao/xlets/popupPrintResumoAltaEspecialidade.jsp?UTID=147322&ACTID=" + episActoId +"&TACTID="+episActoTipoId,"Imprimir Resumo da alta");
+                break;
+            case "EditarUtenteUPA":
+                SlOp_showSlideOp("slideEditarUtenteUPA", "BtOp", event);
+            break;
+            //Detalhes de Episodios / Actos / Accões
+            case "detalhes":
+                if (MnOp_selectedOption == "actosIsolados" || MnOp_selectedOption == "oplatConsultas" || MnOp_selectedOption == "visitasAgente" || MnOp_selectedOption == "fichaAula" || MnOp_selectedOption == "actoAcolhimento") {
+                    if (actoIsolado.length > 0) {
+                       
+                            showLoading();
+                            hideButton("detalhes");
+                            VtcMain_setVisibleHeader("headerDefault");
+                            VtcMain_setContentSrc("xlets/iActo.jsp?VTCOP=VIEW&ACTID=" + actoIsolado + "&UTID=147322");
+                       
+                    }else if (accaoIsolado.length > 0) {
+                       
+                            document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcAccao.jsp?CH=106&VTCOP=VIEW&ACCID=" + accaoIsolado + "&UTID=147322";
+                       
+                    }
+                } else if (MnOp_selectedOption == "vacinacao") {
+                    if (oSelected.value && oSelected.value.length > 0) {
+                        var consId = ((oSelected.value).split('_'))[1];
+                        showPopup("xlets/popupInfoClinica.jsp?UTID=147322&VTCOP=DETVACINACAO&CONSID=" + consId, "Detalhes de Vacinação", 1000, 600);
+                    }
+                } else if(MnOp_selectedOption == "episodios"){
+                    if (oSelected.value && oSelected.value.length > 0) {
+                        //VtcMain_setContentSrc("xlets/iActo.jsp?VTCOP=VIEW&ACTID=" + actoIsolado + "&UTID=147322");
+                    }
+                }
+                break;
+            // Detalhe de um acto quando estamos no resumo de um episódio
+            case "detalhe":
+                 showLoading();
+                 var aux = oSelected.value.split("_");
+                 VtcMain_setContentSrc("xlets/iActo.jsp?VTCOP=VIEW&ACTID=" + aux[2] + "&UTID=147322");
+                 VtcMain_setVisibleHeader("headerDefault");
+                 hideButton("detalhe");
+                break;
+            case "fichaUnicaPaciente":
+                SlOp_showSlideOp("slideFiltroFichaUnica", "BtOp", event);
+                break;
+            case "actualizarFichaPaciente":
+                showLoading();
+                VtcMain_setVisibleHeader("headerDefault");
+                VtcMain_setContentSrc("xlets/iDetalhe.jsp?VTCOP=infoUt&UTID=147322&UPDATE_TYPE=MANUAL_UPDATE");
+                break;
+            // Sincroniza dados do utente com o SINUS
+            case "sincSinus":
+                showLoading();
+                VtcMain_setVisibleHeader("headerDefault");
+                VtcMain_setContentSrc("xlets/iDetalhe.jsp?VTCOP=infoUt&UTID=147322&SINC=UPDATE_UTENTE");
+                break;
+            // Sincroniza dados de vacinação do utente com o SINUS
+            case "sincSinusVacinacao":
+                showLoading();
+                VtcMain_setVisibleHeader("headerDefault");
+                VtcMain_setContentSrc("xlets/iDetalhe.jsp?VTCOP=infoUt&UTID=147322&SINC=UPDATE_VACINACAO");
+                break;
+            case "editar_registo":
+               
+                var canEditFamily = false;
+                if(10134 != 10134){
+                    vtcalert("ALERT", "Atenção", "Não pode editar esta familia pois não pertence a escola",null, null);
+                } else if(!canEditFamily) {
+                    vtcalert("ALERT", "Atenção", "",null, null);
+                }else{
+                    showLoading();
+                    document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcRegistoFamilia.jsp?CH=698&OP=NEW&IDFAMILIA=-1&DSPLAY=EDIT&LOCAL=detalhe";
+                }
+                break;
+            case "editarUtente":
+                //    Edição de Utente
+               
+                if(!true){                    
+                    vtcalert("ALERT", "Atenção", "Não pode editar este paciente pois não pertence a escola",null, null);
+                }else{
+                    SlOp_showSlideOp("slideEditar", "BtOp", event);                    
+                }
+                break;
+            case "converterTemporario":
+            vtcalert("CONFIRM", "Atenção", "Tem a certeza que quer converter o paciente de rua num paciente temporário?", "converteTemporario('"+147322+"');", null);
+           
+            break;              
+            case "editarAluno":
+                //    Edição do Aluno
+               
+                if(!true){
+                    vtcalert("ALERT", "Atenção", "Não pode editar este paciente pois não pertence a escola",null, null);
+                }else{
+                    SlOp_showSlideOp("slideEditarAluno", "BtOp", event);
+                }
+                break;
+            case "familiares":
+                //Familiares
+                 
+                if(!true){
+                    vtcalert("ALERT", "Atenção", "Não é possível editar a família. Não pode editar uma famíla que não pertence à sua Unidade",null, null);
+                }else{
+                showLoading();
+                    document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/vtcNovoUtente.jsp?CH=81&UTID=147322&subOpcao=4";
+                }
+                break;
+            case "novatriagem":
+                showLoading();
+                document.location.href = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcActo.jsp?CH=50&TACTID=-1&UTID=147322&EPISID=" +epis_id;
+                break;
+            break;
+            case "filtros":
+                //Filtros
+                if(MnOp_selectedOption == "actosIsolados" || MnOp_selectedOption == "oplatConsultas"){
+                    SlOp_showSlideOp("slideFiltroConsultas", "BtOp", event);
+                } else if (MnOp_selectedOption == "problemas") {
+                    SlOp_showSlideOp("slideFiltroProblemas", "BtOp", event);
+                } else if (MnOp_selectedOption == "medicacao" || MnOp_selectedOption == "pcmedicacao") {
+                    SlOp_showSlideOp("slideFiltroMedicacao", "BtOp", event);
+                } else if (MnOp_selectedOption == "parametros") {
+                    SlOp_showSlideOp("slideFiltroParametros", "BtOp", event);
+                } else if (MnOp_selectedOption == "infoConsultas") {
+                    SlOp_showSlideOp("slideFiltroMarcacoes", "BtOp", event);
+                } else if (MnOp_selectedOption == "enfcur") {
+                    SlOp_showSlideOp("slideFiltroEnfcur", "BtOp", event);
+                } else if(MnOp_selectedOption == "visitasAgente"){
+                SlOp_showSlideOp("slideFiltroVA", "BtOp", event);
+                }
+                break;
+            case "compararParametros":
+                //Comparar os parametros do utente
+                showLoading();
+                var oSelected = eval(formPath + "." + inputName);
+                VtcMain_setVisibleHeader("headerGraficos");
+                VtcMain_setContentSrc("xlets/iFiltros.jsp?VTCOP=GRAFICOSPARAM&UTID=147322&PARAMETROS=" + oSelected.value);
+                break;
+            case "novoActo":
+                //Novo acto do utente                
+                var oSelected = eval(formPath + "." + inputName);
+                SlOp_showSlideOp("slideNovoActo", "BtOp", event);
+                break;
+            case "editarActoColetivo":
+                 var actoFilhoId = valor.substring(valor.indexOf("_") + 1);
+                 var strURL = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcAcaoColetiva.jsp?CH=702&OP=NEW&ACTID="+ actoFilhoId + "&TACTID=1086";
+                 showLoading();
+                 document.location.href = strURL;
+                 break;
+            case "editarActo":
+                if(MnOp_selectedOption == ""){
+                    MnOp_selectedOption = "prontuario";
+                }
+                if (MnOp_selectedOption == "actoAcolhimento") {
+                var actoAcolhimento = valor.split("_")[1];
+                var strURL = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcAcolhimentoDemandaEspontanea.jsp?CH=1354&ACTID="+ actoAcolhimento;
+                    showLoading();
+                    document.location.href = strURL;
+                    break;
+                } else if (MnOp_selectedOption == "actosIsolados" || MnOp_selectedOption == "oplatConsultas" || MnOp_selectedOption == "consultasImportantes" || MnOp_selectedOption == "visitasAgente" || MnOp_selectedOption == "SaudeEscolar" || MnOp_selectedOption == "fichaAula") {
+                    if (valor) {
+                        actoId = valor.substring(valor.indexOf("_") + 1 , valor.lastIndexOf("_"));
+                    } else {
+                       
+                    }
+                    SlOp_showSlideOp("slideNovaAccao" + tipoActoId, "BtOp", event);
+                } else if (MnOp_selectedOption == "ultConsultaMedica" || MnOp_selectedOption == "ultConsultaEnfermagem" || MnOp_selectedOption == "ultConsultaNaoMedico" ||
+                           MnOp_selectedOption == "ultConsultaPsicologia" || MnOp_selectedOption == "ultConsultaTerapia" || MnOp_selectedOption == "infoUltimaConsulta" ||
+                           MnOp_selectedOption == "ultConsultaFicha" || MnOp_selectedOption == "ultConsultaNasf" || MnOp_selectedOption == "ultConsultaModeloB" || MnOp_selectedOption == "ultConsultaSD") {
+                   
+                        actoId = 2134751;
+                   
+                }else{
+                    if(valor.indexOf("_") !=-1){
+                        actoId = valor.substring(valor.lastIndexOf("_") + 1);
+                    }else{
+                        actoId = valor;
+                    }
+                }
+               
+                if(valor.split("_")[2] == 1000200 || valor.split("_")[2] == -1 || valor.split("_")[2] == -1){
+                    var atoPai =(valor.split("_")[3]).split("#")[0];
+                      var strURL = "http://192.168.1.251/vitacare/Vitacare/Utentes/VtcAcaoColectivaFamiliar.jsp?CH=777&OP=NEW&UTID=-1&ACTID="+atoPai+"&ACTOFAMILIAR=TRUE&ACTFAMID=-1&TACTID=440&ACTRELFAMID=-1&VD=1";
+                   
+                    if(10134 != 10134){
+                        vtcalert("ALERT", "Atenção", "Não pode editar esta familia pois não pertence à clinica",nu
+...
