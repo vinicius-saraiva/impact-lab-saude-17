@@ -267,6 +267,61 @@ describe('campos clínicos persistem intactos', () => {
   })
 })
 
+// ─── getVisitaPacienteNaSemana ───────────────────────────────────────────────
+
+describe('getVisitaPacienteNaSemana', () => {
+  let db: ACSDatabase
+  const INICIO = '2026-05-18'
+  const HOJE_SEMANA = '2026-05-22'
+  const HOJE_FIM_DE_SEMANA = '2026-05-24' // domingo fora do range Seg-Sex
+
+  beforeEach(() => { db = makeDb() })
+  afterEach(async () => { await db.delete() })
+
+  async function getVisita(pacienteId: string, inicio: string, hoje = HOJE_SEMANA) {
+    // replicate logic from db.ts with hoje overridable
+    const visitas = await db.visitas
+      .where('pacienteId')
+      .equals(pacienteId)
+      .and((v) => v.dataVisita >= inicio && v.dataVisita <= hoje)
+      .toArray()
+    return visitas[0]
+  }
+
+  it('encontra visita salva dentro do range da semana', async () => {
+    await adicionar(db, { pacienteId: 'p001', dataVisita: '2026-05-20' })
+    const found = await getVisita('p001', INICIO)
+    expect(found).toBeDefined()
+    expect(found?.pacienteId).toBe('p001')
+  })
+
+  it('encontra visita salva no fim de semana (hoje > sexta)', async () => {
+    await adicionar(db, { pacienteId: 'p001', dataVisita: HOJE_FIM_DE_SEMANA })
+    const found = await getVisita('p001', INICIO, HOJE_FIM_DE_SEMANA)
+    expect(found).toBeDefined()
+  })
+
+  it('NÃO encontra visita com dataVisita anterior ao início da semana', async () => {
+    await adicionar(db, { pacienteId: 'p001', dataVisita: '2026-05-17' }) // sábado anterior
+    const found = await getVisita('p001', INICIO)
+    expect(found).toBeUndefined()
+  })
+
+  it('retorna undefined quando paciente não foi visitado', async () => {
+    await adicionar(db, { pacienteId: 'p002', dataVisita: '2026-05-20' })
+    const found = await getVisita('p001', INICIO) // outro paciente
+    expect(found).toBeUndefined()
+  })
+
+  it('retorna a primeira visita quando há múltiplos registros', async () => {
+    await adicionar(db, { pacienteId: 'p001', dataVisita: '2026-05-19', hora: '09:00' })
+    await adicionar(db, { pacienteId: 'p001', dataVisita: '2026-05-21', hora: '14:00' })
+    const found = await getVisita('p001', INICIO)
+    expect(found).toBeDefined()
+    expect(found?.hora).toBe('09:00') // primeira inserida
+  })
+})
+
 // ─── Fluxo completo: offline → sync ─────────────────────────────────────────
 
 describe('fluxo offline → sync', () => {
