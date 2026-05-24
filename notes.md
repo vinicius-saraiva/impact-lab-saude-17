@@ -89,3 +89,12 @@ O que representa a realidade
 Repositorio com dados
 
 [github.com/prefeitura-rio/claude-impact-lab-saude](https://github.com/prefeitura-rio/claude-impact-lab-saude)
+
+## VitaCare API (TI da Prefeitura / SMS)
+
+TI da SMS vai publicar os detalhes técnicos do **VitaCare API** (auth, endpoints, schema) no mesmo README:
+https://github.com/prefeitura-rio/claude-impact-lab-saude/blob/master/README.md
+
+Status (2026-05-24): README ainda só tem o dataset — VitaCare API ainda não publicado. Rechecar.
+
+Por que importa: se a API existir e for chamável em produção, dá pra ir além do dataset estático — solução pode ler/escrever no prontuário real (VitaCare é o prontuário eletrônico da APS no Rio), o que sobe muito o eixo "Impacto real - usaria isso hoje?" (40% da nota).
