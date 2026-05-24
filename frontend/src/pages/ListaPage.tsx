@@ -123,10 +123,11 @@ export function ListaPage() {
       {pacienteSelecionado && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/20"
+            className="fixed inset-0 bg-black/20"
+            style={{ zIndex: 1000 }}
             onClick={() => setPacienteSelecionado(null)}
           />
-          <div className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl">
+          <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl" style={{ zIndex: 1001 }}>
             <div className="flex items-center justify-between px-4 pt-4 pb-1">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
                 Paciente no mapa
