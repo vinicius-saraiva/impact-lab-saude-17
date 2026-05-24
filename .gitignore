@@ -16,3 +16,5 @@ venv/
 .marimo.toml
 .idea/
 .vscode/
+.claude/
+*.html
