@@ -441,33 +441,60 @@ FICHA B TB → linha de cuidado diária (TDO) — fora da escala normal
 
 ### 6.4 Síntese: Score PRIO-ACS — Adaptado ao Framework Oficial
 
+> ### ⚠️ Aviso de proveniência — leitura obrigatória antes de citar esta rubrica
+>
+> O título desta seção começa com **"Síntese"** porque os **pesos numéricos** (35/25/25/15), os **incrementos** (+15/+20/+25) e os **cortes de tier** (0-30 / 31-60 / 61-100) **foram engenheirados pela equipe** e calibrados pelos achados do dataset. **Não saíram verbatim de nenhuma portaria, manual ou DOCX.**
+>
+> O que **é oficial e auditável** são os **frameworks de origem** abaixo:
+>
+> | Componente | Origem | Evidência |
+> |---|---|---|
+> | Existência dos 19 grupos ICSAP; grupo 9 = HAS, 13 = DM, 19 = gestação | ✅ **Real** — Portaria SAS/MS 221/2008 | linha 357 deste doc |
+> | Escala de Risco Familiar com 3 categorias (habitual/médio/alto) + cadências mensal/quinzenal/semanal | ✅ **Real** — Ficha A SIAB/SISAB | linha 355 deste doc + `docs/context/OFFICIAL_SMS_RIO_FRAMEWORK.md` |
+> | Cadências por grupo (gestante 30d / crônico 90d / geral 180d) | ✅ **Real** — DOCX SMS-Rio 8 linhas de cuidado + Carteira APS Rio 2021 pp.46/87 | linha 356 deste doc |
+> | Achados do dataset (49,9% nunca visitados; 43% gestantes c/ urgência) | ✅ **Real** — perfilagem | `data_profile.json` |
+> | **Pesos 35 / 25 / 25 / 15** (caps por componente) | ⚙️ **Síntese da equipe** | Inventados nesta seção em 2026-05-24 12:19 |
+> | **Incrementos +15 / +20 / +25** dentro de cada componente | ⚙️ **Síntese da equipe** | Idem |
+> | **Cortes de tier 0-30 / 31-60 / 61-100** | ⚙️ **Síntese da equipe** | Idem — o SIAB define as 3 categorias mas não o corte numérico |
+> | **Janela de 60 dias** para "evento recente" | ⚙️ **Síntese da equipe** | Idem |
+> | **45 dias** como gap_limite para criança 0-6 (faixa agregada) | ⚠️ **Mistura** — cadências por subfaixa são REAIS; o valor único 45d é compromisso para a faixa agregada do dataset | Carteira Rio pp.46/87 |
+>
+> Já sinalizado internamente em `FRONTEND_EVALUATION.md:75` — *"README acrescentar 'PRIO-ACS deriva de Charlson + eFI + ICSAP'"* — ou seja, a equipe já reconhecia que isto é derivação, não citação direta.
+>
+> **Enquadramento no pitch (3 atos: hoje vs. próximo):**
+>
+> - **v1 (hoje)** — Score com regras transparentes, auditáveis, derivadas de **Portaria 221/2008 + Ficha A SIAB + Carteira APS Rio 2021**. Pesos calibrados pelos achados empíricos do dataset. Toda decisão de visita pode citar a portaria/manual que a sustenta.
+> - **v2 (próximo)** — Calibração dos pesos por **ML supervisionado** com feedback dos supervisores de equipe; janela de "evento recente" parametrizada por grupo (60d genérico → 6 meses para idoso de Guia ACS p.177; 30d para gestante); separação de gestante alto risco (CAB 32 §5.2.2) vs. habitual; captura de TB/Hanseníase e acamado via Ficha para visita diária/mensal.
+>
+> Ver `CRITERIOS_PRIORIZACAO_ACS.md` §3.8 para a tabela de auditoria de proveniência completa.
+
 **Score 0-100, 4 componentes aditivos:**
 
 ```
-ICSAP proxy (35 pts):
-  +15 hipertenso     [ICSAP grupo 9]
-  +15 diabético      [ICSAP grupo 13]
-  +15 gestação       [ICSAP grupo 19]
-  cap em 35
+ICSAP proxy (cap 35):                          # peso 35: SÍNTESE
+  +15 hipertenso     [ICSAP grupo 9]           # grupo: REAL · peso: SÍNTESE
+  +15 diabético      [ICSAP grupo 13]          # grupo: REAL · peso: SÍNTESE
+  +15 gestação       [ICSAP grupo 19]          # grupo: REAL · peso: SÍNTESE
 
-Vulnerable life-stage (25 pts):
-  +25 gestação
-  +20 faixa_etaria "0-6"
-  +15 idoso (65+) + crônico
+Vulnerable life-stage (cap 25):                # peso 25: SÍNTESE
+  +25 gestação                                 # peso: SÍNTESE
+  +20 faixa_etaria "0-6"                       # peso: SÍNTESE
+  +15 idoso (65+) + crônico                    # peso: SÍNTESE
   (pega o maior, não soma)
 
-Care gap / urgency (25 pts):
-  +15 evento não-eletivo nos últimos 60d
-  +10 gap visita > limite_por_grupo
-     (gestante: 30d / criança<5: 45d / crônico: 90d / geral: 180d)
+Care gap / urgency (cap 25):                   # peso 25: SÍNTESE
+  +15 evento não-eletivo nos últimos 60d       # peso e janela 60d: SÍNTESE
+  +10 gap visita > limite_por_grupo            # peso: SÍNTESE
+     (gestante: 30d / criança<5: 45d           # 30d/90d/180d: REAL (Carteira Rio)
+      crônico: 90d / geral: 180d)              # 45d: MISTURA (faixa agregada do dataset)
 
-Social vulnerability (15 pts):
-  +15 situacao_vulnerabilidade
+Social vulnerability (cap 15):                 # peso 15: SÍNTESE
+  +15 situacao_vulnerabilidade                 # flag: REAL · peso: SÍNTESE
 
-TRADUÇÃO para Escala de Risco Familiar (oficial):
-  0-30   → Risco habitual    → Mensal
-  31-60  → Risco médio       → Quinzenal a mensal
-  61-100 → Risco alto        → Semanal a quinzenal
+TRADUÇÃO para Escala de Risco Familiar:        # 3 tiers + cadências: REAL (Ficha A SIAB)
+  0-30   → Risco habitual    → Mensal          # corte 30: SÍNTESE · cadência: REAL
+  31-60  → Risco médio       → Quinzenal/mensal# cortes 31/60: SÍNTESE · cadência: REAL
+  61-100 → Risco alto        → Semanal/quinzenal# corte 61: SÍNTESE · cadência: REAL
 ```
 
 ---
