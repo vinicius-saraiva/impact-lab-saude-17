@@ -16,6 +16,7 @@
 - [x] `RacaCor` corrigido — Branca / Preta / Parda / Amarela / Indígena / Outros
 - [x] Deploy Vercel — https://frontend-psi-black-9cdy0n3cqq.vercel.app
 - [x] **Bônus 1 — Painel de gestão** (`/supervisor`): KPI nunca visitados, cobertura por linha de cuidado com semáforo, ranking Previne, alertas críticos de gestantes alto risco. Consome `out/dashboard_supervisor.json` (tipado em `src/dataSupervisor.ts`). Botão "Painel de gestão" no header da Lista do ACS.
+- [x] **Painel do médico** (`/medico` + `/medico/paciente/:id`): camada de inteligência sobre o VitaCare APS pra Dra. Laura. Lista filtrável (HAS / DM / criança / vulnerável / crítico) ordenada por PRIO-ACS, e por paciente: breakdown PRIO-ACS (ICSAP / ciclo de vida / lacuna de cuidado / vulnerabilidade), última visita ACS com pressão+adesão+risco, timeline de eventos não-eletivos (UPA/internação), próxima consulta agendada, sugestões clínicas. Dados em `src/dataMedico.ts`.
 
 ---
 

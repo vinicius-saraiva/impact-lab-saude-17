@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ListaPage } from './pages/ListaPage'
 import { VisitaPage } from './pages/VisitaPage'
 import { SupervisorPage } from './pages/SupervisorPage'
+import { MedicoPage } from './pages/MedicoPage'
+import { PacienteMedicoPage } from './pages/PacienteMedicoPage'
 
 export default function App() {
   return (
@@ -11,6 +13,8 @@ export default function App() {
           <Route path="/" element={<ListaPage />} />
           <Route path="/visita/:id" element={<VisitaPage />} />
           <Route path="/supervisor" element={<SupervisorPage />} />
+          <Route path="/medico" element={<MedicoPage />} />
+          <Route path="/medico/paciente/:id" element={<PacienteMedicoPage />} />
         </Routes>
       </div>
     </BrowserRouter>
