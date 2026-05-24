@@ -26,6 +26,13 @@ function formatarDia(iso: string): { nomeDia: string; numeroDia: string; ehHoje:
   }
 }
 
+function rangeSemanaDias(dias: string[]): string {
+  if (dias.length === 0) return ''
+  const ini = formatarDia(dias[0])
+  const fim = formatarDia(dias[dias.length - 1])
+  return `${ini.nomeDia} ${ini.numeroDia} – ${fim.nomeDia} ${fim.numeroDia}`
+}
+
 export function ListaPage() {
   const navigate = useNavigate()
   const { pendentes, status, isOnline, sincronizar } = useSync()
@@ -65,7 +72,7 @@ export function ListaPage() {
       <div className="bg-blue-700 text-white px-4 pt-10 pb-4">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-blue-200 text-sm">Semana atual</p>
+            <p className="text-blue-200 text-sm">{rangeSemanaDias(diasOrdenados)}</p>
             <h1 className="text-2xl font-bold mt-0.5">Olá, {NOME_ACS} 👋</h1>
             <p className="text-blue-200 text-sm mt-0.5">Clínica da Família Rocinha</p>
           </div>
@@ -162,7 +169,7 @@ export function ListaPage() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
-            {pacientesDia.length} visitas planejadas
+            {totalSemana} visitas planejadas esta semana
           </h2>
           <span className="text-xs text-slate-400">máx. 5/dia</span>
         </div>
@@ -179,7 +186,7 @@ export function ListaPage() {
             paciente={paciente}
             ordem={i + 1}
             visitado={visitadosSemana.has(paciente.id)}
-            onClick={() => navigate(`/visita/${paciente.id}`)}
+            onClick={() => navigate(`/paciente/${paciente.id}`)}
           />
         ))}
       </div>
