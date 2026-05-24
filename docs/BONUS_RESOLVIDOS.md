@@ -9,7 +9,7 @@
 | Desafio | Pergunta original | Status | Onde está |
 |---|---|---|---|
 | **Bônus 1 — Gestão** | "Construir visualizações importantes para os gestores das unidades / gestor de área programática" | ✅ **Implementado** | Rota `/supervisor` |
-| **Bônus 2 — ACS** | "Detectar lacunas de cuidado e melhorias em acompanhamentos que indiquem respostas mais rápidas (ou mesmo menos reativas)" | ✅ **Design + plano completos** · 🔄 implementação em execução | Spec, plano e código |
+| **Bônus 2 — ACS** | "Detectar lacunas de cuidado e melhorias em acompanhamentos que indiquem respostas mais rápidas (ou mesmo menos reativas)" | 📋 **Design + plano + camada de dados** · UI não implementada (tempo) | Spec, plano e Task 1 de 14 do plano |
 | **Extra — Painel médico** | (fora dos bônus, pedido em sessão) | ✅ **Implementado** | Rotas `/medico` e `/medico/paciente/:id` |
 
 ---
@@ -87,13 +87,32 @@ O ACS só descobre que um paciente foi à UPA via WhatsApp da família — quand
 
 Identificamos 3 gaps possíveis:
 
-| Gap | Decisão |
+| Gap | Decisão de escopo |
 |---|---|
-| **Gap 1 — Alerta UPA em destaque** | ✅ **Incluído** |
+| **Gap 1 — Alerta UPA em destaque** | 📋 Incluído no design + plano (não implementado) |
 | **Gap 2 — Tendência clínica** (pressão subindo, adesão caindo) | ❌ Descartado (exige enriquecer mock com histórico, complexidade média-alta) |
-| **Gap 3 — Distinção visual rotina vs reativo** | ✅ **Incluído** (endereça o "menos reativas" do enunciado) |
+| **Gap 3 — Distinção visual rotina vs reativo** | 📋 Incluído no design + plano (endereça o "menos reativas" do enunciado, não implementado) |
 
-### O que entregamos
+### O que está PRONTO de fato
+
+| Item | Status | Onde |
+|---|---|---|
+| **Design completo** | ✅ Commitado | [`docs/superpowers/specs/2026-05-24-bonus-2-alertas-upa-acs-design.md`](superpowers/specs/2026-05-24-bonus-2-alertas-upa-acs-design.md) |
+| **Plano de implementação** (14 tasks bite-sized, TDD) | ✅ Commitado | [`docs/superpowers/plans/2026-05-24-bonus-2-alertas-upa-acs.md`](superpowers/plans/2026-05-24-bonus-2-alertas-upa-acs.md) |
+| **Camada de tipos** (`EventoUpa`, `ultimoEventoUpa?`, `cadenciaLimiteDias`) + backfill em todos os 18 pacientes do mock | ✅ Commitado | Task 1 de 14 do plano — `frontend/src/types.ts` + `frontend/src/mockData.ts` |
+| **Helpers puros** (`alertas.ts`) com 28 testes Vitest | ❌ Não rodado | Tasks 2-5 do plano |
+| **Mock enrichment** (`ultimoEventoUpa` em 3 pacientes) | ❌ Não rodado | Task 6 |
+| **Componentes UI** (`BannerAlertaUpa`, `SecaoLista`, `BadgeUpaRecente`, `BadgeGapVencido`, `PacienteCardLista`) | ❌ Não rodado | Tasks 7-11 |
+| **Integração em `ListaPage` + `VisitaPage`** | ❌ Não rodado | Tasks 12-13 |
+| **Smoke visual Playwright** | ❌ Não rodado | Task 14 |
+
+### Por que parou ali
+
+Tempo de hackathon esgotou antes de rodar as Tasks 2-14. Spec + plano + camada de dados ficaram consolidados pra que o próximo a pegar o trabalho comece direto na Task 2 do plano (helpers em `alertas.ts`).
+
+### Design especificado (UX desenhada na spec, não implementada)
+
+A spec descreve 4 elementos visuais — todos ficam pra implementar:
 
 #### 1. Banner UPA no topo da Lista do dia
 > 🚨 **3 pacientes seus passaram na UPA esta semana**
@@ -119,28 +138,23 @@ Quando ACS abre o form de um paciente alertado:
 
 Aproveita o `script_abordagem` que o backend já gera adaptado pra esse caso.
 
-### Arquitetura
+### Arquitetura planejada (na spec)
 
-| Camada | Arquivo | Responsabilidade |
+| Camada | Arquivo | Status |
 |---|---|---|
-| **Tipos** | `frontend/src/types.ts` | `EventoUpa`, `ultimoEventoUpa?`, `cadenciaLimiteDias` |
-| **Lógica pura** | `frontend/src/alertas.ts` | 7 funções puras (`cadenciaPadrao`, `temAlertaUpa`, `diasDesdeEventoUpa`, `gapVencido`, `diasAtraso`, `ehReativo`, `particionarLista`) |
-| **Testes** | `frontend/src/test/alertas.test.ts` | 28 casos Vitest cobrindo todos os helpers |
-| **Mock data** | `frontend/src/mockData.ts` | Enriquecido com `ultimoEventoUpa` em 3 pacientes-chave (Maria F., Francisca M., Fernanda R.) |
-| **Componentes** | `frontend/src/components/` | `BannerAlertaUpa`, `SecaoLista`, `BadgeUpaRecente`, `BadgeGapVencido`, `PacienteCardLista` (refator) |
-| **Páginas** | `frontend/src/pages/` | `ListaPage` integra banner + seções, `VisitaPage` ganha banner contextual |
+| **Tipos** (`EventoUpa`, `ultimoEventoUpa?`, `cadenciaLimiteDias`) | `frontend/src/types.ts` | ✅ Feito |
+| **Mock backfill** (`cadenciaLimiteDias` em 18 pacientes) | `frontend/src/mockData.ts` | ✅ Feito |
+| **Lógica pura** (7 funções) | `frontend/src/alertas.ts` | ❌ Não feito (Tasks 2-5) |
+| **Testes** (28 casos Vitest) | `frontend/src/test/alertas.test.ts` | ❌ Não feito |
+| **Mock enrichment** (`ultimoEventoUpa` em 3 pacientes) | `frontend/src/mockData.ts` | ❌ Não feito (Task 6) |
+| **Componentes** (banner, seção, 2 badges, card refatorado) | `frontend/src/components/` | ❌ Não feito (Tasks 7-11) |
+| **Integração nas páginas** | `frontend/src/pages/ListaPage.tsx` + `VisitaPage.tsx` | ❌ Não feito (Tasks 12-13) |
 
-### Documentação
+### Commits feitos
 
-| Doc | O que contém |
-|---|---|
-| [`docs/superpowers/specs/2026-05-24-bonus-2-alertas-upa-acs-design.md`](superpowers/specs/2026-05-24-bonus-2-alertas-upa-acs-design.md) | Design completo — UX, arquitetura, edge cases, critérios de aceite |
-| [`docs/superpowers/plans/2026-05-24-bonus-2-alertas-upa-acs.md`](superpowers/plans/2026-05-24-bonus-2-alertas-upa-acs.md) | Plano de implementação em 14 tasks bite-sized (TDD nos helpers) |
-
-### Commits
 - [`688ffc9`](https://github.com/vinicius-saraiva/impact-lab-saude-17/commit/688ffc9) — *docs(specs): design bônus 2*
-- [`9f722ca`](https://github.com/vinicius-saraiva/impact-lab-saude-17/commit/9f722ca) — *docs(plans): plano de implementação bônus 2*
-- (commits de implementação serão anexados aqui conforme as 14 tasks rodarem)
+- [`9f722ca`](https://github.com/vinicius-saraiva/impact-lab-saude-17/commit/9f722ca) — *docs(plans): plano de implementação bônus 2 (14 tasks)*
+- [`99bf6d2`](https://github.com/vinicius-saraiva/impact-lab-saude-17/commit/99bf6d2) — *feat(types): adiciona EventoUpa e cadenciaLimiteDias ao Paciente* (Task 1 de 14)
 
 ### Métrica de impacto (pro pitch)
 > Hoje a Camila descobre que um paciente foi à UPA via WhatsApp da família, dias depois — **quando descobre**. Com alerta no app, ela vê no dia seguinte (sync 15:30, janela em que ela volta pra clínica). Cada visita pós-UPA evitando re-internação economiza ~R$ 1.500 (média SUS internação clínica) + reduz risco de morte por descompensação. Escalado pra 6.200 ACS × ~2 alertas/semana = **~13k alertas/semana** de pacientes hoje invisíveis pra APS.
@@ -213,11 +227,11 @@ Cada persona tem **botão de voltar pra Lista do ACS** ("← Modo ACS") — UX c
 
 | Critério (peso) | Como esse trabalho contribui |
 |---|---|
-| **Impacto real (40%)** | 3 personas reais (ACS + gestor + médica) usando o produto amanhã, com dados reais dos parquets. Bônus 2 ataca a dor #2 da Camila citada na entrevista. |
-| **Produto (20%)** | Design consistente entre 3 telas (mesma fonte, badges reaproveitados), mobile-first, offline-first (PWA), navegação fluida |
-| **Engenharia (20%)** | Lógica pura testada (28 testes Vitest no `alertas.ts`), tipos rigorosos (`cadenciaLimiteDias` espelha backend Python), zero duplicação de regra (front consome JSON gerado pelo script Python) |
-| **Ideia (10%)** | Distinção visual rotina vs reativo no bônus 2 — categoria nova de UX que sai da "lista linear" e ataca diretamente o "menos reativas" do enunciado |
-| **Apresentação (10%)** | README + este doc + spec + plano + 6 commits descritivos + PR aberto pronto pra demo |
+| **Impacto real (40%)** | 3 personas reais com produto rodando (ACS + gestor + médica) usando dados reais dos parquets. Bônus 2 documentado em spec executável (design endereça a dor #2 da Camila citada na entrevista) mas UI não chegou a ser implementada. |
+| **Produto (20%)** | Design consistente entre as 3 telas implementadas (mesma fonte, badges reaproveitados), mobile-first, offline-first (PWA), navegação fluida com botão de volta consistente |
+| **Engenharia (20%)** | Tipos rigorosos (`cadenciaLimiteDias` no front espelha `_gap_limit_for_row` do backend Python), zero duplicação de regra (front consome JSON gerado pelo script `gerar_lista_do_dia.py`), 23 testes Vitest no IndexedDB (sync offline) |
+| **Ideia (10%)** | Distinção visual rotina vs reativo desenhada no bônus 2 — categoria de UX que sai da "lista linear" e ataca o "menos reativas" do enunciado. Não implementada, mas spec + plano deixam o caminho pronto. |
+| **Apresentação (10%)** | README + este doc + spec do bônus 2 + plano em 14 tasks + 5 commits descritivos no PR aberto |
 
 ---
 
