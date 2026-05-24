@@ -9,8 +9,10 @@ export function useSync() {
 
   const atualizarPendentes = useCallback(async () => {
     const lista = await getVisitasPendentes()
+    const syncUrl = import.meta.env.VITE_SYNC_URL as string | undefined
     setPendentes(lista.length)
-    setStatus(lista.length > 0 ? 'pending' : 'synced')
+    // Sem backend configurado → sempre "synced" para a UI (dados salvos localmente)
+    setStatus(lista.length > 0 && !!syncUrl ? 'pending' : 'synced')
   }, [])
 
   useEffect(() => {
@@ -34,12 +36,12 @@ export function useSync() {
     const lista = await getVisitasPendentes()
     if (lista.length === 0) return
 
-    // URL configurável via env; fallback para a API do backend quando disponível
+    // URL configurável via env; quando não configurada, dados ficam só no dispositivo
     const syncUrl = import.meta.env.VITE_SYNC_URL as string | undefined
 
-    // Sem URL configurada → mantém pendente silenciosamente
     if (!syncUrl) {
-      setStatus('pending')
+      // Sem backend → tratar como "salvo localmente", não como pendente de envio
+      setStatus('synced')
       return
     }
 
