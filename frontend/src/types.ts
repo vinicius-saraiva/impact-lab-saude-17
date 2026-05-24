@@ -12,6 +12,11 @@ export interface RegistroHipertensao {
   dataRegistro: string
 }
 
+export interface EventoUpa {
+  data: string         // ISO YYYY-MM-DD
+  local: string        // "UPA Rocinha", "Hospital Miguel Couto"
+}
+
 export interface Paciente {
   id: string
   nome: string
@@ -37,6 +42,9 @@ export interface Paciente {
   enderecoDescricao: string
   // dados históricos opcionais
   ultimoRegistroHipertensao?: RegistroHipertensao
+  // alertas bônus 2
+  ultimoEventoUpa?: EventoUpa     // só se houve evento não-eletivo nos últimos 60d
+  cadenciaLimiteDias: number      // 30 gestante / 45 criança 0-6 / 90 crônico / 180 outro
 }
 
 export interface RegistroVisita {

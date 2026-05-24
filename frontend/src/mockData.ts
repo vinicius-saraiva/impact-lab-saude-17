@@ -31,6 +31,7 @@ export const PACIENTE_HIPERTENSO: Paciente = {
   prioScore: 85,
   motivoPrioridade: 'hipertenso + diabético · idoso 66+ · vulnerável · sem visita há 365d',
   ultimaVisita: '2025-05-24',
+  cadenciaLimiteDias: 90,
   ultimoRegistroHipertensao: {
     tomaMedicacao: true,
     pressao: '150/95',
@@ -56,6 +57,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'critica', prioScore: 82,
     motivoPrioridade: 'hipertenso + diabético · idoso 66+ · vulnerável · sem visita há 332d',
     ultimaVisita: '2025-06-27',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-003',
@@ -70,6 +72,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'critica', prioScore: 72,
     motivoPrioridade: '2 urgência/internação · hipertenso + diabético · idoso 66+ · sem visita há 365d',
     ultimaVisita: '2025-05-24',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-004',
@@ -84,6 +87,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'critica', prioScore: 72,
     motivoPrioridade: 'hipertenso + diabético · idoso 66+ · vulnerável · sem visita há 183d',
     ultimaVisita: '2025-11-22',
+    cadenciaLimiteDias: 90,
   },
 
   {
@@ -99,6 +103,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'alta', prioScore: 68,
     motivoPrioridade: '3 urgência/internação · hipertenso + diabético · idoso 66+',
     ultimaVisita: '2026-03-10',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-006',
@@ -113,6 +118,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'alta', prioScore: 67,
     motivoPrioridade: 'hipertenso + diabético · vulnerável · sem visita há 327d',
     ultimaVisita: '2025-07-02',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-007',
@@ -127,6 +133,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'alta', prioScore: 67,
     motivoPrioridade: 'hipertenso + diabético · idoso 66+ · sem visita há 328d',
     ultimaVisita: '2025-07-01',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-008',
@@ -141,6 +148,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'alta', prioScore: 67,
     motivoPrioridade: 'hipertenso + diabético · idoso 66+ · sem visita há 334d',
     ultimaVisita: '2025-06-25',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-009',
@@ -155,6 +163,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'alta', prioScore: 66,
     motivoPrioridade: '6 urgência/internação · hipertenso + diabético · idoso 66+',
     ultimaVisita: '2026-02-15',
+    cadenciaLimiteDias: 90,
   },
 
   {
@@ -170,6 +179,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'media', prioScore: 49,
     motivoPrioridade: 'hipertenso + diabético · sem visita há 283d',
     ultimaVisita: '2025-08-15',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-011',
@@ -184,6 +194,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'media', prioScore: 49,
     motivoPrioridade: '1 urgência/internação · hipertenso · idoso 66+ · sem visita há 223d',
     ultimaVisita: '2025-10-13',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-012',
@@ -198,6 +209,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'media', prioScore: 49,
     motivoPrioridade: 'criança 0-6a · vulnerável · sem visita há 218d',
     ultimaVisita: '2025-10-19',
+    cadenciaLimiteDias: 45,
   },
   {
     id: 'p-013',
@@ -212,6 +224,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'media', prioScore: 49,
     motivoPrioridade: '1 urgência/internação · hipertenso + diabético · sem visita há 239d',
     ultimaVisita: '2025-09-28',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-014',
@@ -226,6 +239,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'media', prioScore: 49,
     motivoPrioridade: 'criança 0-6a · vulnerável · sem visita há 211d',
     ultimaVisita: '2025-10-26',
+    cadenciaLimiteDias: 45,
   },
   {
     id: 'p-015',
@@ -240,6 +254,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'media', prioScore: 49,
     motivoPrioridade: '2 urgência/internação · hipertenso + diabético · sem visita há 229d',
     ultimaVisita: '2025-10-08',
+    cadenciaLimiteDias: 90,
   },
 
   {
@@ -255,6 +270,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'baixa', prioScore: 29,
     motivoPrioridade: '2 urgência/internação · hipertenso · sem visita há 181d',
     ultimaVisita: '2025-11-24',
+    cadenciaLimiteDias: 90,
   },
   {
     id: 'p-017',
@@ -269,6 +285,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'baixa', prioScore: 29,
     motivoPrioridade: '4 urgência/internação · sem visita há 378d',
     ultimaVisita: '2025-05-11',
+    cadenciaLimiteDias: 180,
   },
   {
     id: 'p-018',
@@ -283,6 +300,7 @@ export const MOCK_PACIENTES: Paciente[] = [
     prioridade: 'baixa', prioScore: 29,
     motivoPrioridade: '4 urgência/internação · sem visita há 365d',
     ultimaVisita: '2025-05-24',
+    cadenciaLimiteDias: 180,
   },
 ]
 
