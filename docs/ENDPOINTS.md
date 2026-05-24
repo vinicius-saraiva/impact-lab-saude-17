@@ -236,42 +236,95 @@ batched é suportado, é só passar um array.
 
 ---
 
-## 4. Auth — MVP
+## 4. Realtime — motor reage à medida que dados entram
+
+As 3 RPCs já são **real-time on read**: cada chamada recomputa o score
+contra o estado atual das tabelas. Não tem JSON estático, não tem batch.
+
+Pra o front saber **quando** rebuscar, ligamos Supabase Realtime em
+`visitas_capturadas`, `eventos` e `visitas`. Assina o canal, recebe
+INSERT/UPDATE/DELETE via WebSocket e refaz a chamada da lista.
+
+```ts
+import { useEffect } from 'react'
+
+function useListaPriorizadaRealtime(equipeId: string, onChange: () => void) {
+  useEffect(() => {
+    const channel = supabase
+      .channel(`equipe-${equipeId}`)
+      // Toda visita captada em campo afeta o score (gap, ultima_visita).
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'visitas_capturadas' },
+        () => onChange())
+      // Futuro: quando a ponte Vitacare empurrar novos eventos/visitas.
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'eventos' },
+        () => onChange())
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'visitas' },
+        () => onChange())
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [equipeId, onChange])
+}
+```
+
+**Padrão recomendado:** combine com React Query / SWR.
+
+```ts
+const { data, refetch } = useQuery({
+  queryKey: ['lista', equipeId],
+  queryFn: () => supabase
+    .rpc('priorizacao_pacientes', { p_equipe_id: equipeId })
+    .order('score', { ascending: false })
+    .limit(8),
+})
+
+useListaPriorizadaRealtime(equipeId, refetch)
+```
+
+Resultado: ACS termina uma visita → grava em `visitas_capturadas` → o
+backend recompute na próxima leitura → todos os clientes conectados
+recebem push e refazem a lista. Ranking se reordena sozinho.
+
+**Filtragem por equipe** (evita receber eventos de outras microáreas):
+
+```ts
+.on('postgres_changes',
+  {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'visitas_capturadas',
+    filter: `paciente_id=in.(${pacienteIds.join(',')})`,
+  },
+  () => onChange())
+```
+
+(O ideal seria filtrar por `equipe_id` direto — adicionamos uma coluna
+desnormalizada em `visitas_capturadas` se virar gargalo.)
+
+
+## 5. Auth — MVP
 
 Sem RLS ligado no MVP. Anon key tem leitura/escrita total nas 5 tabelas e
-permissão de `EXECUTE` nas 3 functions.
+permissão de `EXECUTE` nas 4 functions.
 
 **Para a demo:**
 - Tela inicial: dropdown de ACS (ver §3.2).
 - Selecionado o ACS → salvar `profissional_id` no localStorage.
-- Toda chamada a `priorizacao_pacientes` usa o `equipe_id` derivado dele
-  (precisa de uma query auxiliar pra mapear `profissional_id → equipe_id`).
+- Resolver a equipe num único RPC:
 
 ```ts
-// dado o profissional, descobrir a equipe (microárea principal dele)
-const { data } = await supabase.rpc('priorizacao_pacientes', { p_equipe_id: '' })
-// HACK: na verdade, melhor consultar visitas e pegar o equipe_id mais frequente:
-const { data: v } = await supabase
-  .from('visitas')
-  .select('paciente_id')
-  .eq('profissional_id', acsId)
-  .limit(50)
-
-const { data: pacs } = await supabase
-  .from('pacientes')
-  .select('equipe_id')
-  .in('paciente_id', v?.map(x => x.paciente_id) ?? [])
-
-// modo do equipe_id
-const equipeId = mode(pacs?.map(p => p.equipe_id))
+const { data: equipeId } = await supabase.rpc('equipe_do_profissional', {
+  p_profissional_id: acsId,
+})
+// usa esse equipeId em priorizacao_pacientes / dashboard_equipe
 ```
-
-(Posso criar uma function `equipe_do_profissional(p_profissional_id)` se
-ficar repetitivo — me avisa.)
 
 ---
 
-## 5. Onde está cada função no código
+## 6. Onde está cada função no código
 
 | O que você vai fazer | API |
 |---|---|
@@ -286,7 +339,7 @@ ficar repetitivo — me avisa.)
 
 ---
 
-## 6. Latências esperadas (medidas em sa-east-1)
+## 7. Latências esperadas (medidas em sa-east-1)
 
 | Call | Tempo |
 |---|---|
@@ -300,11 +353,12 @@ Se precisarmos derrubar mais, dá pra adicionar materialized view ou
 
 ---
 
-## 7. O que ainda não fizemos (roadmap pós-MVP)
+## 8. O que ainda não fizemos (roadmap pós-MVP)
 
 - RLS por `equipe_id` no JWT (substitui filtro server-side por permissão de banco)
-- Função `equipe_do_profissional(profissional_id)` (atalho do §4)
 - View `vw_profissionais_distintos` (atalho do §3.2)
 - Trigger que sincroniza `visitas_capturadas` → tabela `visitas` quando
   o Vitacare aceitar o envio
+- Coluna desnormalizada `equipe_id` em `visitas_capturadas` para filtrar
+  Realtime por equipe diretamente (em vez de por `paciente_id IN (...)`)
 - Audit log de leituras individuais de paciente
