@@ -156,6 +156,6 @@ Restrições validadas em campo:
 
 ## Deploy
 
-- [ ] Deploy frontend (Netlify ou Vercel — gratuito, HTTPS obrigatório para PWA)
+- [x] Deploy frontend — **https://frontend-psi-black-9cdy0n3cqq.vercel.app** (Vercel, HTTPS, PWA pronto)
 - [ ] Deploy backend FastAPI (Fly.io ou Railway)
 - [ ] README do hackathon: demo video, link do app, arquitetura, impacto (1.55M horas/ano)
