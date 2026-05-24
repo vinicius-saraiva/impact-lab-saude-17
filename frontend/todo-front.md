@@ -15,6 +15,7 @@
 - [x] Link Google Maps no formulário — endereço do paciente (sem sugestão de rota)
 - [x] `RacaCor` corrigido — Branca / Preta / Parda / Amarela / Indígena / Outros
 - [x] Deploy Vercel — https://frontend-psi-black-9cdy0n3cqq.vercel.app
+- [x] **Bônus 1 — Painel de gestão** (`/supervisor`): KPI nunca visitados, cobertura por linha de cuidado com semáforo, ranking Previne, alertas críticos de gestantes alto risco. Consome `out/dashboard_supervisor.json` (tipado em `src/dataSupervisor.ts`). Botão "Painel de gestão" no header da Lista do ACS.
 
 ---
 
