@@ -30,6 +30,15 @@
    - Score PRIO-ACS proposto (precisa atualização para alinhar com Escala de Risco Familiar oficial)
    - ICSAP, Previne Brasil 15 indicadores, ACSC
 
+### 💰 Análise de Impacto Econômico e Saúde Pública
+
+4. **[ROI.md](../ROI.md)** ⭐
+   - Análise completa de retorno sobre investimento (Rio + upside Brasil)
+   - Custos detalhados (CAPEX + OPEX), benefícios em ICSAP + Previne Brasil
+   - Sensibilidade (pessimista 17× / base 47× / otimista 98× / stress 1×)
+   - Benefícios em saúde pública (15-30 mortes infantis evitadas/ano em Rio)
+   - **Extrato pronto para o pitch (3 frases + parágrafo de 6 min)**
+
 ---
 
 ## Hierarquia de Autoridade
