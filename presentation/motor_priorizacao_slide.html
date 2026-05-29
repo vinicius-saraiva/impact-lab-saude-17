@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>Motor PRIO-ACS</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 56px 32px;
+    gap: 24px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  header h1 {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #f8fafc;
+  }
+  header h1 span { color: #38bdf8; }
+  header .pill {
+    font-size: 12px;
+    background: #1e3a5f;
+    color: #7dd3fc;
+    border: 1px solid #2563eb44;
+    border-radius: 20px;
+    padding: 4px 16px;
+    letter-spacing: 0.4px;
+  }
+
+  /* ── COMPONENTS ── */
+  .components {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .component-row {
+    display: grid;
+    grid-template-columns: 230px 1fr 72px;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .comp-label { display: flex; flex-direction: column; gap: 3px; }
+  .comp-name  { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+  .comp-source{ font-size: 11px; color: #64748b; }
+
+  .comp-bar-wrap {
+    background: #1e293b;
+    border-radius: 7px;
+    height: 42px;
+    overflow: hidden;
+  }
+  .comp-bar {
+    height: 100%;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+  }
+  .tag {
+    background: rgba(0,0,0,0.25);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .note {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    white-space: nowrap;
+  }
+
+  .bar-icsap     { background: linear-gradient(90deg, #1d4ed8, #3b82f6); width: 100%; }
+  .bar-lifestage { background: linear-gradient(90deg, #0d9488, #14b8a6); width: 71%; }
+  .bar-gap       { background: linear-gradient(90deg, #b45309, #f59e0b); width: 71%; }
+  .bar-social    { background: linear-gradient(90deg, #7c3aed, #a78bfa); width: 43%; }
+
+  .comp-max {
+    font-size: 22px;
+    font-weight: 700;
+    text-align: right;
+    color: #94a3b8;
+  }
+  .comp-max span { font-size: 12px; color: #475569; }
+
+  /* gap chips row */
+  .gap-row {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    gap: 20px;
+    align-items: center;
+  }
+  .gap-label { font-size: 11px; color: #475569; }
+  .gap-chips { display: flex; gap: 8px; }
+  .chip {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .chip-orange { background: #451a0308; border-color: #f59e0b55; color: #fcd34d; }
+  .chip-blue   { background: #1e3a5f10; border-color: #3b82f655; color: #93c5fd; }
+  .chip-green  { background: #14532d10; border-color: #22c55e55; color: #86efac; }
+
+  /* ── TOTAL BAR ── */
+  .total-row {
+    display: grid;
+    grid-template-columns: 230px 1fr 72px;
+    gap: 20px;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #1e293b;
+  }
+  .total-label { font-size: 14px; font-weight: 700; color: #cbd5e1; }
+  .total-bar {
+    height: 46px;
+    border-radius: 7px;
+    display: flex;
+    overflow: hidden;
+  }
+  .zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .zone-habitual { width: 30%; background: #14532d; }
+  .zone-medio    { width: 30%; background: #92400e; }
+  .zone-alto     { width: 40%; background: #7f1d1d; }
+  .zone-name  { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.85); }
+  .zone-score { font-size: 9px;  color: rgba(255,255,255,0.45); }
+  .zone-cad   { font-size: 9px;  color: rgba(255,255,255,0.55); }
+  .total-max { font-size: 22px; font-weight: 700; color: #f1f5f9; }
+  .total-max span { font-size: 12px; color: #475569; }
+
+  /* ── FOOTER ── */
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-principle { font-size: 11px; color: #475569; }
+  .footer-principle strong { color: #94a3b8; }
+  .footer-sources { font-size: 10px; color: #334155; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Motor <span>PRIO-ACS</span> — como o app decide quem visitar primeiro</h1>
+</header>
+
+<div class="components">
+
+  <!-- LIFE STAGE -->
+  <div class="component-row">
+    <div class="comp-label">
+      <div class="comp-name">Fase de vida vulnerável</div>
+      <div class="comp-source">Manual ACS-MS · SMS-Rio</div>
+    </div>
+    <div class="comp-bar-wrap">
+      <div class="comp-bar bar-lifestage">
+        <span class="tag">+25 gestante</span>
+        <span class="tag">+20 criança 0-6</span>
+        <span class="tag">+15 idoso > 66 anos crônico</span>
+        <span class="note">— pega o maior, não soma</span>
+      </div>
+    </div>
+    <div class="comp-max">25<span>/100</span></div>
+  </div>
+
+  <!-- ICSAP -->
+  <div class="component-row">
+    <div class="comp-label">
+      <div class="comp-name">Carga de doença crônica</div>
+      <div class="comp-source">ICSAP proxy · Portaria SAS/MS 221/2008</div>
+    </div>
+    <div class="comp-bar-wrap">
+      <div class="comp-bar bar-icsap">
+        <span class="tag">+15 hipertenso</span>
+        <span class="tag">+15 diabético</span>
+        <span class="tag">+15 gestação</span>
+      </div>
+    </div>
+    <div class="comp-max">35<span>/100</span></div>
+  </div>
+
+  <!-- SOCIAL -->
+  <div class="component-row">
+    <div class="comp-label">
+      <div class="comp-name">Vulnerabilidade social</div>
+      <div class="comp-source">Cadastro Vitacare · override do ACS</div>
+    </div>
+    <div class="comp-bar-wrap">
+      <div class="comp-bar bar-social">
+        <span class="tag">+15 situação de vulnerabilidade</span>
+      </div>
+    </div>
+    <div class="comp-max">15<span>/100</span></div>
+  </div>
+
+  <!-- CARE GAP -->
+  <div class="component-row">
+    <div class="comp-label">
+      <div class="comp-name">Gap de cuidado / urgência</div>
+      <div class="comp-source">Vitacare + sinais do form ACS</div>
+    </div>
+    <div class="comp-bar-wrap">
+      <div class="comp-bar bar-gap">
+        <span class="tag">+15 urgência/UPA nos últimos 60 dias</span>
+        <span class="tag">+10 visita atrasada</span>
+      </div>
+    </div>
+    <div class="comp-max">25<span>/100</span></div>
+  </div>
+
+  <!-- GAP LIMITS -->
+  <div class="gap-row">
+    <div class="gap-label">Limite de dias entre visitas (Carteira APS SMS-Rio 2021)</div>
+    <div class="gap-chips">
+      <div class="chip chip-orange">gestante: 30 dias</div>
+      <div class="chip chip-orange">criança 0-6: 45 dias</div>
+      <div class="chip chip-blue">crônico: 90 dias</div>
+      <div class="chip chip-green">demais: 180 dias</div>
+    </div>
+  </div>
+
+  <!-- TOTAL -->
+  <div class="total-row">
+    <div class="total-label">Score final</div>
+    <div class="total-bar">
+      <div class="zone zone-habitual">
+        <div class="zone-name">🟢 Habitual</div>
+        <div class="zone-score">0 – 30</div>
+        <div class="zone-cad">Mensal</div>
+      </div>
+      <div class="zone zone-medio">
+        <div class="zone-name">🟡 Médio</div>
+        <div class="zone-score">31 – 60</div>
+        <div class="zone-cad">Quinzenal</div>
+      </div>
+      <div class="zone zone-alto">
+        <div class="zone-name">🔴 Alto</div>
+        <div class="zone-score">61 – 100</div>
+        <div class="zone-cad">Semanal</div>
+      </div>
+    </div>
+    <div class="total-max">100</div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-principle">
+    <strong>A Claudia decide a ordem final.</strong> O motor é insumo, nunca comando.
+    &nbsp;·&nbsp; Cada visita registrada reordena a lista em tempo real via Supabase Realtime.
+  </div>
+  <div class="footer-sources">
+    Portaria SAS/MS 221/2008 · Manual ACS-MS · Fichas SMS-Rio · PNAB · Carteira APS 2021
+  </div>
+</footer>
+
+</body>
+</html>

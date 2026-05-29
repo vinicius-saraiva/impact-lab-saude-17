@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>Motor PRIO-ACS v2a</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 44px 60px 36px;
+    gap: 32px;
+  }
+
+  header { display: flex; flex-direction: column; gap: 6px; }
+  h1 { font-size: 28px; font-weight: 700; color: #f8fafc; }
+  h1 span { color: #38bdf8; }
+  .subtitle { font-size: 14px; color: #475569; }
+
+  /* 4 cards in a row */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    flex: 1;
+  }
+
+  .card {
+    border-radius: 14px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-teal   { background: #0d3330; border: 1px solid #14b8a655; }
+  .card-blue   { background: #0d1f3c; border: 1px solid #3b82f655; }
+  .card-purple { background: #1a0e33; border: 1px solid #a78bfa55; }
+  .card-amber  { background: #2d1a04; border: 1px solid #f59e0b55; }
+
+  .card-max {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .card-teal   .card-max { color: #2dd4bf; }
+  .card-blue   .card-max { color: #60a5fa; }
+  .card-purple .card-max { color: #c4b5fd; }
+  .card-amber  .card-max { color: #fbbf24; }
+
+  .card-pts { font-size: 14px; color: #475569; margin-top: -6px; }
+
+  .card-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1.3;
+  }
+
+  .card-criteria {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: auto;
+  }
+  .criterion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .card-teal   .dot { background: #14b8a6; }
+  .card-blue   .dot { background: #3b82f6; }
+  .card-purple .dot { background: #a78bfa; }
+  .card-amber  .dot { background: #f59e0b; }
+
+  .card-note {
+    font-size: 10px;
+    color: #334155;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* total bar */
+  .total-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .total-bar {
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    overflow: hidden;
+  }
+  .zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .zone-habitual { width: 30%; background: #14532d; }
+  .zone-medio    { width: 30%; background: #92400e; }
+  .zone-alto     { width: 40%; background: #7f1d1d; }
+  .zone-name  { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); }
+  .zone-sub   { font-size: 10px; color: rgba(255,255,255,0.45); }
+
+  .total-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #334155;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Como o <span>PRIO-ACS</span> calcula quem visitar primeiro</h1>
+  <div class="subtitle">Score 0–100 por paciente · 4 fatores aditivos</div>
+</header>
+
+<div class="cards">
+
+  <!-- LIFE STAGE -->
+  <div class="card card-teal">
+    <div class="card-max">25</div>
+    <div class="card-pts">pontos</div>
+    <div class="card-name">Fase de vida vulnerável</div>
+    <div class="card-criteria">
+      <div class="criterion"><div class="dot"></div>+25 gestante</div>
+      <div class="criterion"><div class="dot"></div>+20 criança 0-6 anos</div>
+      <div class="criterion"><div class="dot"></div>+15 idoso &gt; 66 com crônico</div>
+      <div class="card-note">pega o maior, não soma</div>
+    </div>
+  </div>
+
+  <!-- ICSAP -->
+  <div class="card card-blue">
+    <div class="card-max">35</div>
+    <div class="card-pts">pontos</div>
+    <div class="card-name">Carga de doença crônica</div>
+    <div class="card-criteria">
+      <div class="criterion"><div class="dot"></div>+15 hipertenso</div>
+      <div class="criterion"><div class="dot"></div>+15 diabético</div>
+      <div class="criterion"><div class="dot"></div>+15 gestação</div>
+      <div class="card-note">Portaria SAS/MS 221/2008</div>
+    </div>
+  </div>
+
+  <!-- SOCIAL -->
+  <div class="card card-purple">
+    <div class="card-max">15</div>
+    <div class="card-pts">pontos</div>
+    <div class="card-name">Vulnerabilidade social</div>
+    <div class="card-criteria">
+      <div class="criterion"><div class="dot"></div>+15 situação de vulnerabilidade</div>
+      <div class="card-note">cadastro Vitacare · override do ACS</div>
+    </div>
+  </div>
+
+  <!-- CARE GAP -->
+  <div class="card card-amber">
+    <div class="card-max">25</div>
+    <div class="card-pts">pontos</div>
+    <div class="card-name">Gap de cuidado / urgência</div>
+    <div class="card-criteria">
+      <div class="criterion"><div class="dot"></div>+15 urgência/UPA nos últimos 60 dias</div>
+      <div class="criterion"><div class="dot"></div>+10 visita atrasada</div>
+      <div class="card-note">Vitacare + sinais do form ACS</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="total-section">
+  <div class="total-bar">
+    <div class="zone zone-habitual">
+      <div class="zone-name">🟢 Habitual</div>
+      <div class="zone-sub">0–30 · Mensal</div>
+    </div>
+    <div class="zone zone-medio">
+      <div class="zone-name">🟡 Médio</div>
+      <div class="zone-sub">31–60 · Quinzenal</div>
+    </div>
+    <div class="zone zone-alto">
+      <div class="zone-name">🔴 Alto</div>
+      <div class="zone-sub">61–100 · Semanal</div>
+    </div>
+  </div>
+  <div class="total-label">
+    <span>A Claudia decide a ordem final — o motor é insumo, nunca comando.</span>
+    <span>Portaria SAS/MS 221/2008 · Manual ACS-MS · Carteira APS SMS-Rio 2021</span>
+  </div>
+</div>
+
+</body>
+</html>

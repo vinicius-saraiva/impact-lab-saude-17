@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>Motor de priorização</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #ffffff;
+    color: #0f172a;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 64px 36px;
+    gap: 36px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: center;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── EQUATION ROW ── */
+  .equation {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  /* each factor: circle + name + tags, fixed width */
+  .factor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 188px;
+    flex-shrink: 0;
+  }
+
+  .factor-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .fc-teal   { background: #f0fdfa; border: 2px solid #14b8a6; }
+  .fc-blue   { background: #eff6ff; border: 2px solid #3b82f6; }
+  .fc-purple { background: #f5f3ff; border: 2px solid #a78bfa; }
+  .fc-amber  { background: #fffbeb; border: 2px solid #f59e0b; }
+
+  .circle-num { font-size: 34px; font-weight: 800; line-height: 1; }
+  .fc-teal   .circle-num { color: #0d9488; }
+  .fc-blue   .circle-num { color: #2563eb; }
+  .fc-purple .circle-num { color: #7c3aed; }
+  .fc-amber  .circle-num { color: #d97706; }
+
+  .circle-pts { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+
+  .factor-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  .factor-tags {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .tag { font-size: 12px; color: #64748b; text-align: center; }
+  .tag b { color: #334155; font-weight: 600; }
+
+  /* operators: margin-top aligns them with circle center (100px / 2 - ~16px) */
+  .op {
+    font-size: 28px;
+    font-weight: 300;
+    color: #cbd5e1;
+    flex-shrink: 0;
+    margin-top: 36px;
+    width: 28px;
+    text-align: center;
+  }
+
+  /* result block: same top-align as factors */
+  .result-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+  }
+  .eq-sign {
+    font-size: 28px;
+    font-weight: 300;
+    color: #cbd5e1;
+    margin-top: 36px;
+    margin-bottom: 0;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .result-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .result-num   { font-size: 34px; font-weight: 800; color: #ffffff; line-height: 1; }
+  .result-label { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+  .result-name  {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  /* ── TIERS ── */
+  .tiers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .tier-pill {
+    padding: 12px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tp-green  { background: #f0fdf4; border: 1px solid #22c55e55; }
+  .tp-yellow { background: #fffbeb; border: 1px solid #f59e0b55; }
+  .tp-red    { background: #fff1f2; border: 1px solid #ef444455; }
+
+  .tier-left { display: flex; flex-direction: column; gap: 2px; }
+  .tier-name { font-size: 15px; font-weight: 700; }
+  .tp-green  .tier-name { color: #15803d; }
+  .tp-yellow .tier-name { color: #b45309; }
+  .tp-red    .tier-name { color: #b91c1c; }
+
+  .tier-cad { font-size: 12px; color: #64748b; }
+
+  .tier-range {
+    font-size: 22px;
+    font-weight: 800;
+    color: #e2e8f0;
+    letter-spacing: -0.5px;
+  }
+  .tp-green  .tier-range { color: #bbf7d0; }
+  .tp-yellow .tier-range { color: #fde68a; }
+  .tp-red    .tier-range { color: #fecdd3; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    font-size: 10px;
+    color: #1e293b;
+  }
+</style>
+</head>
+<body>
+
+<h1>Motor de priorização</h1>
+
+<div class="equation">
+
+  <!-- LIFE STAGE -->
+  <div class="factor">
+    <div class="factor-circle fc-teal">
+      <div class="circle-num">25</div>
+      <div class="circle-pts">pts</div>
+    </div>
+    <div class="factor-name">Fase de vida vulnerável</div>
+    <div class="factor-tags">
+      <div class="tag"><b>+25</b> gestante</div>
+      <div class="tag"><b>+20</b> criança 0-6</div>
+      <div class="tag"><b>+15</b> idoso &gt;66 crônico</div>
+    </div>
+  </div>
+
+  <div class="op">+</div>
+
+  <!-- ICSAP -->
+  <div class="factor">
+    <div class="factor-circle fc-blue">
+      <div class="circle-num">35</div>
+      <div class="circle-pts">pts</div>
+    </div>
+    <div class="factor-name">Carga crônica</div>
+    <div class="factor-tags">
+      <div class="tag"><b>+15</b> hipertenso</div>
+      <div class="tag"><b>+15</b> diabético</div>
+      <div class="tag"><b>+15</b> gestação</div>
+    </div>
+  </div>
+
+  <div class="op">+</div>
+
+  <!-- SOCIAL -->
+  <div class="factor">
+    <div class="factor-circle fc-purple">
+      <div class="circle-num">15</div>
+      <div class="circle-pts">pts</div>
+    </div>
+    <div class="factor-name">Vulnerabilidade social</div>
+    <div class="factor-tags">
+      <div class="tag"><b>+15</b> vulnerabilidade social</div>
+    </div>
+  </div>
+
+  <div class="op">+</div>
+
+  <!-- CARE GAP -->
+  <div class="factor">
+    <div class="factor-circle fc-amber">
+      <div class="circle-num">25</div>
+      <div class="circle-pts">pts</div>
+    </div>
+    <div class="factor-name">Gap de cuidado / urgência</div>
+    <div class="factor-tags">
+      <div class="tag"><b>+15</b> urgência nos últimos 60d</div>
+      <div class="tag"><b>+10</b> visita atrasada</div>
+    </div>
+  </div>
+
+  <div class="eq-sign">=</div>
+
+  <!-- RESULT -->
+  <div class="result-block">
+    <div class="result-circle">
+      <div class="result-num">100</div>
+      <div class="result-label">pts max</div>
+    </div>
+    <div class="result-name">Score final</div>
+  </div>
+
+</div>
+
+<!-- TIERS -->
+<div class="tiers">
+  <div class="tier-pill tp-green">
+    <div class="tier-left">
+      <div class="tier-name">🟢 Habitual</div>
+      <div class="tier-cad">Mensal</div>
+    </div>
+    <div class="tier-range">0–30</div>
+  </div>
+  <div class="tier-pill tp-yellow">
+    <div class="tier-left">
+      <div class="tier-name">🟡 Médio</div>
+      <div class="tier-cad">Quinzenal</div>
+    </div>
+    <div class="tier-range">31–60</div>
+  </div>
+  <div class="tier-pill tp-red">
+    <div class="tier-left">
+      <div class="tier-name">🔴 Alto</div>
+      <div class="tier-cad">Semanal</div>
+    </div>
+    <div class="tier-range">61–100</div>
+  </div>
+</div>
+
+<footer>Portaria SAS/MS 221/2008 · Manual ACS-MS · Carteira APS SMS-Rio 2021 · A Claudia decide a ordem final — o motor é insumo, nunca comando.</footer>
+
+</body>
+</html>

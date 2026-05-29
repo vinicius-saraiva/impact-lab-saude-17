@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>Motor PRIO-ACS v2c</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto 1fr auto;
+    gap: 0;
+  }
+
+  /* header spans full width */
+  header {
+    grid-column: 1 / -1;
+    padding: 40px 56px 24px;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  h1 { font-size: 28px; font-weight: 700; color: #f8fafc; }
+  h1 span { color: #38bdf8; }
+  .subtitle { font-size: 13px; color: #475569; }
+
+  /* left: factor table */
+  .factors {
+    padding: 28px 40px 28px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    border-right: 1px solid #1e293b;
+  }
+
+  .factor-row {
+    display: grid;
+    grid-template-columns: 28px 220px 1fr 52px;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid #1e293b;
+  }
+  .factor-row:last-child { border-bottom: none; }
+
+  .fnum {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .fname {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e8f0;
+    line-height: 1.3;
+  }
+  .fsource {
+    font-size: 10px;
+    color: #475569;
+    margin-top: 2px;
+  }
+
+  .ftags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .ftag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #1e293b;
+    color: #94a3b8;
+    background: #1e293b;
+    white-space: nowrap;
+  }
+  .fnote {
+    font-size: 10px;
+    color: #334155;
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  .fmax {
+    font-size: 26px;
+    font-weight: 800;
+    text-align: right;
+  }
+  .fmax span { font-size: 11px; font-weight: 400; color: #475569; }
+
+  .teal   .fmax { color: #2dd4bf; }
+  .blue   .fmax { color: #60a5fa; }
+  .purple .fmax { color: #c4b5fd; }
+  .amber  .fmax { color: #fbbf24; }
+
+  /* colored accent stripe */
+  .teal   { border-left: 3px solid #14b8a6; padding-left: 13px; margin-left: -16px; }
+  .blue   { border-left: 3px solid #3b82f6; padding-left: 13px; margin-left: -16px; }
+  .purple { border-left: 3px solid #a78bfa; padding-left: 13px; margin-left: -16px; }
+  .amber  { border-left: 3px solid #f59e0b; padding-left: 13px; margin-left: -16px; }
+
+  /* right: score meter */
+  .meter-col {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .meter-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #475569;
+  }
+
+  /* vertical score bar */
+  .vbar-wrap {
+    flex: 1;
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+    min-height: 0;
+  }
+  .vbar {
+    width: 48px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .vzone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .vzone-alto     { flex: 40; background: #7f1d1d; }
+  .vzone-medio    { flex: 30; background: #92400e; }
+  .vzone-habitual { flex: 30; background: #14532d; }
+
+  .vbar-labels {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0;
+  }
+  .vlabel {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .vl-name  { font-size: 14px; font-weight: 700; }
+  .vl-range { font-size: 11px; color: #475569; }
+  .vl-cad   { font-size: 11px; }
+
+  .vlabel-alto   .vl-name { color: #fca5a5; }
+  .vlabel-alto   .vl-cad  { color: #f87171; }
+  .vlabel-medio  .vl-name { color: #fde68a; }
+  .vlabel-medio  .vl-cad  { color: #fbbf24; }
+  .vlabel-habitual .vl-name { color: #86efac; }
+  .vlabel-habitual .vl-cad  { color: #4ade80; }
+
+  /* footer */
+  footer {
+    grid-column: 1 / -1;
+    padding: 12px 56px;
+    border-top: 1px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-l { font-size: 11px; color: #475569; }
+  .footer-r { font-size: 10px; color: #334155; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Motor <span>PRIO-ACS</span> — score por paciente</h1>
+  <div class="subtitle">4 fatores · 0 a 100 pontos · calculado em tempo real</div>
+</header>
+
+<!-- LEFT: factor table -->
+<div class="factors">
+
+  <div class="factor-row teal">
+    <div class="fnum">1</div>
+    <div>
+      <div class="fname">Fase de vida vulnerável</div>
+      <div class="fsource">Manual ACS-MS · SMS-Rio</div>
+    </div>
+    <div class="ftags">
+      <div class="ftag">+25 gestante</div>
+      <div class="ftag">+20 criança 0-6</div>
+      <div class="ftag">+15 idoso &gt;66 crônico</div>
+      <div class="fnote">pega o maior</div>
+    </div>
+    <div class="fmax">25<span>pts</span></div>
+  </div>
+
+  <div class="factor-row blue">
+    <div class="fnum">2</div>
+    <div>
+      <div class="fname">Carga de doença crônica</div>
+      <div class="fsource">Portaria SAS/MS 221/2008</div>
+    </div>
+    <div class="ftags">
+      <div class="ftag">+15 hipertenso</div>
+      <div class="ftag">+15 diabético</div>
+      <div class="ftag">+15 gestação</div>
+    </div>
+    <div class="fmax">35<span>pts</span></div>
+  </div>
+
+  <div class="factor-row purple">
+    <div class="fnum">3</div>
+    <div>
+      <div class="fname">Vulnerabilidade social</div>
+      <div class="fsource">Cadastro Vitacare · override do ACS</div>
+    </div>
+    <div class="ftags">
+      <div class="ftag">+15 situação de vulnerabilidade</div>
+    </div>
+    <div class="fmax">15<span>pts</span></div>
+  </div>
+
+  <div class="factor-row amber">
+    <div class="fnum">4</div>
+    <div>
+      <div class="fname">Gap de cuidado / urgência</div>
+      <div class="fsource">Vitacare + sinais do form ACS</div>
+    </div>
+    <div class="ftags">
+      <div class="ftag">+15 urgência/UPA 60 dias</div>
+      <div class="ftag">+10 visita atrasada</div>
+    </div>
+    <div class="fmax">25<span>pts</span></div>
+  </div>
+
+</div>
+
+<!-- RIGHT: vertical tier meter -->
+<div class="meter-col">
+  <div class="meter-title">Resultado → prioridade</div>
+  <div class="vbar-wrap">
+    <div class="vbar">
+      <div class="vzone vzone-alto"></div>
+      <div class="vzone vzone-medio"></div>
+      <div class="vzone vzone-habitual"></div>
+    </div>
+    <div class="vbar-labels">
+      <div class="vlabel vlabel-alto">
+        <div class="vl-name">🔴 Alto</div>
+        <div class="vl-range">61 – 100</div>
+        <div class="vl-cad">Semanal</div>
+      </div>
+      <div class="vlabel vlabel-medio">
+        <div class="vl-name">🟡 Médio</div>
+        <div class="vl-range">31 – 60</div>
+        <div class="vl-cad">Quinzenal</div>
+      </div>
+      <div class="vlabel vlabel-habitual">
+        <div class="vl-name">🟢 Habitual</div>
+        <div class="vl-range">0 – 30</div>
+        <div class="vl-cad">Mensal</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-l">A Claudia decide a ordem final — o motor é insumo, nunca comando.</div>
+  <div class="footer-r">Portaria SAS/MS 221/2008 · Manual ACS-MS · Carteira APS SMS-Rio 2021</div>
+</footer>
+
+</body>
+</html>

@@ -10,3 +10,5 @@ __pycache__/
 .gstack/
 *Zone.Identifier
 impact-lab-saude-app/
+supabase/.temp/
+.env
